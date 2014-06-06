@@ -21,6 +21,7 @@
     <properties>
         <dropwizard.version>0.6.2</dropwizard.version>
         <spring.version>4.0.3.RELEASE</spring.version>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <dependencies>
