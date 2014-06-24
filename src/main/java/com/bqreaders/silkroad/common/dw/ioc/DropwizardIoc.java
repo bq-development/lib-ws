@@ -4,6 +4,7 @@
  */
 package com.bqreaders.silkroad.common.dw.ioc;
 
+import com.bqreaders.silkroad.common.charset.CharsetResponseFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +52,11 @@ public class DropwizardIoc {
 		gzipConfiguration.setEnabled(false);
 		return gzipConfiguration;
 	}
+
+    @Bean
+    public CharsetResponseFilter getCharsetResponseFilter() {
+        return new CharsetResponseFilter();
+    }
 
 	private ConsoleConfiguration getConsoleConfiguration() {
 		ConsoleConfiguration configuration = new ConsoleConfiguration();
