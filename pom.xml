@@ -13,8 +13,8 @@
     <name>ws-common</name>
 
     <scm>
-        <connection>scm:git:git@bitbucket.org:mundoreader/lib-ws-common.git</connection>
-        <developerConnection>scm:git:git@bitbucket.org:mundoreader/lib-ws-common.git</developerConnection>
+        <connection>scm:git:ssh://bq-jenkins@gitent-scm.com/git/bqreaders/lib-ws-common</connection>
+        <developerConnection>scm:git:ssh://bq-jenkins@gitent-scm.com/git/bqreaders/lib-ws-common</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
