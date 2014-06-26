@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.ws.rs.HttpMethod;
 
+import com.bqreaders.silkroad.common.model.CustomHeaders;
 import com.google.common.base.Joiner;
 import com.google.common.net.HttpHeaders;
 import com.sun.jersey.spi.container.ContainerRequest;
@@ -56,7 +57,8 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 			if (request.getMethod().equals(HttpMethod.OPTIONS)) {
 				response.getHttpHeaders().add(HttpHeaders.ACCESS_CONTROL_MAX_AGE, preflightRequestMaxAge);
 				response.getHttpHeaders().add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
-						Joiner.on(",").join(HttpHeaders.AUTHORIZATION, HttpHeaders.ACCEPT, HttpHeaders.CONTENT_TYPE));
+						Joiner.on(",").join(HttpHeaders.AUTHORIZATION, HttpHeaders.ACCEPT, HttpHeaders.CONTENT_TYPE,
+                                CustomHeaders.NO_REDIRECT_HEADER.getValue()));
 				response.getHttpHeaders().add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION);
 				if (response.getHttpHeaders().containsKey(HttpHeaders.ALLOW)) {
 					response.getHttpHeaders().add(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,

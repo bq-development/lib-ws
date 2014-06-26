@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 StarTIC
  */
-package com.bqreaders.silkroad.common.charset;
+package com.bqreaders.silkroad.common.filter;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -27,18 +27,19 @@ public class CharsetResponseFilterTest {
 
 	private ContainerRequest request;
 	private ContainerResponse response;
-	private final MultivaluedMap<String, Object> responseHeaders = new OutBoundHeaders();
+    private CharsetResponseFilter filter;
+    private final MultivaluedMap<String, Object> responseHeaders = new OutBoundHeaders();
 
 	@Before
 	public void setup() {
 		request = mock(ContainerRequest.class);
 		response = mock(ContainerResponse.class);
 		when(response.getHttpHeaders()).thenReturn(responseHeaders);
+        filter = new CharsetResponseFilter(true);
 	}
 
 	@Test
 	public void testCharsetResponseFilterWithAtomXml() {
-		CharsetResponseFilter filter = new CharsetResponseFilter();
 		when(request.getMethod()).thenReturn("GET");
 		when(response.getMediaType()).thenReturn(javax.ws.rs.core.MediaType.APPLICATION_ATOM_XML_TYPE);
 		filter.filter(request, response);
@@ -47,7 +48,6 @@ public class CharsetResponseFilterTest {
 
 	@Test
 	public void testCharsetResponseFilterWithUrlEncoded() {
-		CharsetResponseFilter filter = new CharsetResponseFilter();
 		when(request.getMethod()).thenReturn("GET");
 		when(response.getMediaType()).thenReturn(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
 		filter.filter(request, response);
@@ -57,7 +57,6 @@ public class CharsetResponseFilterTest {
 
 	@Test
 	public void testCharsetDefinedInRespinse() {
-		CharsetResponseFilter filter = new CharsetResponseFilter();
 		when(request.getMethod()).thenReturn("GET");
 		when(response.getMediaType()).thenReturn(
 				new MediaType("application", "json", Collections.singletonMap("charset", "UTF-16")));

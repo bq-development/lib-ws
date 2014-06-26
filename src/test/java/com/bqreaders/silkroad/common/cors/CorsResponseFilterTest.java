@@ -7,8 +7,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.bqreaders.silkroad.common.model.CustomHeaders;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,9 +79,10 @@ public class CorsResponseFilterTest {
 		assertThat(responseHeaders.getFirst("Access-Control-Allow-Methods")).isEqualTo("GET");
 		assertThat(responseHeaders.getFirst("Access-Control-Expose-Headers")).isEqualTo("Location");
 		String[] allowedHeaders = ((String) responseHeaders.getFirst("Access-Control-Allow-Headers")).split(",");
-		assertThat(allowedHeaders).contains("Authorization");
-		assertThat(allowedHeaders).contains("Accept");
-		assertThat(allowedHeaders).contains("Content-Type");
+        assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
+        assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
+        assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
+        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.getValue());
 	}
 
 	@Test
@@ -105,8 +108,9 @@ public class CorsResponseFilterTest {
 		assertThat(responseHeaders.getFirst("Access-Control-Allow-Methods")).isEqualTo("GET");
 		assertThat(responseHeaders.getFirst("Access-Control-Expose-Headers")).isEqualTo("Location");
 		String[] allowedHeaders = ((String) responseHeaders.getFirst("Access-Control-Allow-Headers")).split(",");
-		assertThat(allowedHeaders).contains("Authorization");
-		assertThat(allowedHeaders).contains("Accept");
-		assertThat(allowedHeaders).contains("Content-Type");
+		assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
+		assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
+		assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
+        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.getValue());
 	}
 }
