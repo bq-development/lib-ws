@@ -47,7 +47,7 @@ public class NoRedirectResponseFilterTest {
     @Test
     public void testRedirectResponseFilterWithNoRedirectHeaderSetToTrue() {
         when(response.getStatus()).thenReturn(Status.TEMPORARY_REDIRECT.getStatusCode());
-        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.getValue())).thenReturn("true");
+        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.toString())).thenReturn("true");
         filter.filter(request, response);
         assertThat(response.getStatus()).isEqualTo(Status.TEMPORARY_REDIRECT.getStatusCode());
         verify(response, times(1)).setStatus(Status.NO_CONTENT.getStatusCode());
@@ -56,7 +56,7 @@ public class NoRedirectResponseFilterTest {
     @Test
     public void testRedirectResponseFilterWithNoRedirectHeaderSetToFalse() {
         when(response.getStatus()).thenReturn(Status.TEMPORARY_REDIRECT.getStatusCode());
-        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.getValue())).thenReturn("false");
+        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.toString())).thenReturn("false");
         filter.filter(request, response);
         assertThat(response.getStatus()).isEqualTo(Status.TEMPORARY_REDIRECT.getStatusCode());
         verify(response, times(0)).setStatus(Status.NO_CONTENT.getStatusCode());
@@ -65,7 +65,7 @@ public class NoRedirectResponseFilterTest {
     @Test
     public void testRedirectResponseFilterWithNoRedirectHeaderSetWithErrorValue() {
         when(response.getStatus()).thenReturn(Status.TEMPORARY_REDIRECT.getStatusCode());
-        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.getValue())).thenReturn("error");
+        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.toString())).thenReturn("error");
         filter.filter(request, response);
         assertThat(response.getStatus()).isEqualTo(Status.TEMPORARY_REDIRECT.getStatusCode());
         verify(response, times(0)).setStatus(Status.NO_CONTENT.getStatusCode());
@@ -74,7 +74,7 @@ public class NoRedirectResponseFilterTest {
     @Test
     public void testRedirectResponseFilterWithNoRedirectHeaderSetToTrueToStatusOk() {
         when(response.getStatus()).thenReturn(Status.OK.getStatusCode());
-        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.getValue())).thenReturn("true");
+        when(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.toString())).thenReturn("true");
         filter.filter(request, response);
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         verify(response, times(0)).setStatus(Status.NO_CONTENT.getStatusCode());

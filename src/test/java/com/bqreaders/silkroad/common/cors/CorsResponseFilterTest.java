@@ -82,7 +82,7 @@ public class CorsResponseFilterTest {
         assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
         assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
         assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
-        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.getValue());
+        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
 	}
 
 	@Test
@@ -111,6 +111,6 @@ public class CorsResponseFilterTest {
 		assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
 		assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
 		assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
-        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.getValue());
+        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
 	}
 }

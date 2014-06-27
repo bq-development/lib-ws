@@ -21,7 +21,7 @@ public class NoRedirectResponseFilter implements ContainerResponseFilter {
     @Override
     public ContainerResponse filter(ContainerRequest request, ContainerResponse response) {
         if (enabled && redirect(response.getStatus())
-                && Boolean.parseBoolean(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.getValue()))) {
+                && Boolean.parseBoolean(request.getHeaderValue(CustomHeaders.NO_REDIRECT_HEADER.toString()))) {
             response.setStatus(Response.Status.NO_CONTENT.getStatusCode());
         }
         return response;
