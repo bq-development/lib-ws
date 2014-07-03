@@ -13,6 +13,8 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import redis.clients.jedis.JedisPoolConfig;
+
 import com.bqreaders.lib.token.ioc.TokenIoc;
 import com.bqreaders.lib.token.parser.TokenParser;
 import com.bqreaders.silkroad.common.auth.AuthorizationInfo;
@@ -39,33 +41,89 @@ public class AuthorizationIoc {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthorizationIoc.class);
 
 	@Bean
-	public AuthorizationRulesRepository getAuthorizationRulesRepository() {
-		return new RedisAuthorizationRulesRepository(redisTemplate());
+	public AuthorizationRulesRepository getAuthorizationRulesRepository(RedisTemplate<String, JsonObject> redisTemplate) {
+		return new RedisAuthorizationRulesRepository(redisTemplate);
 	}
 
 	@Bean
-	public RedisTemplate<String, JsonObject> redisTemplate() {
+	public RedisTemplate<String, JsonObject> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
 		final RedisTemplate<String, JsonObject> template = new RedisTemplate<>();
-		template.setConnectionFactory(jedisConnectionFactory());
+		template.setConnectionFactory(jedisConnectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new GsonRedisSerializer<JsonObject>());
 		return template;
 	}
 
 	@Bean
-	public JedisConnectionFactory jedisConnectionFactory() {
-		return new JedisConnectionFactory();
+	public JedisConnectionFactory jedisConnectionFactory(JedisPoolConfig jedisPoolConfig,
+			@Value("auth.redis.host") String host, @Value("auth.redis.port") Integer port,
+			@Value("auth.redis.password") String password) {
+		JedisConnectionFactory connFactory = new JedisConnectionFactory(jedisPoolConfig);
+		if (host != null) {
+			connFactory.setHostName(host);
+		}
+		if (port != null) {
+			connFactory.setPort(port);
+		}
+		if (password != null) {
+			connFactory.setPassword(password);
+		}
+		return connFactory;
 	}
 
 	@Bean
-	public AuthorizationRulesService authorizationRulesService() {
-		return new DefaultAuthorizationRulesService(getAuthorizationRulesRepository());
+	public JedisPoolConfig jedisPoolConfig(@Value("auth.redis.maxIdle") Integer maxIdle,
+			@Value("auth.redis.maxTotal") Integer maxTotal, @Value("auth.redis.minIdle") Integer minIdle,
+			@Value("auth.redis.testOnBorrow") Boolean testOnBorrow,
+			@Value("auth.redis.testOnReturn") Boolean testOnReturn,
+			@Value("auth.redis.testWhileIdle") Boolean testWhileIdle,
+			@Value("auth.redis.numTestsPerEvictionRun") Integer numTestsPerEvictionRun,
+			@Value("auth.redis.maxWaitMillis") Long maxWaitMillis,
+			@Value("auth.redis.timeBetweenEvictionRunsMillis") Long timeBetweenEvictionRunsMillis,
+			@Value("auth.redis.blockWhenExhausted") Boolean blockWhenExhausted) {
+		JedisPoolConfig config = new JedisPoolConfig();
+		if (maxIdle != null) {
+			config.setMaxIdle(maxIdle);
+		}
+		if (maxTotal != null) {
+			config.setMaxTotal(maxTotal);
+		}
+		if (minIdle != null) {
+			config.setMinIdle(minIdle);
+		}
+		if (testOnBorrow != null) {
+			config.setTestOnBorrow(testOnBorrow);
+		}
+		if (testOnReturn != null) {
+			config.setTestOnReturn(testOnReturn);
+		}
+		if (testWhileIdle != null) {
+			config.setTestWhileIdle(testWhileIdle);
+		}
+		if (numTestsPerEvictionRun != null) {
+			config.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
+		}
+		if (timeBetweenEvictionRunsMillis != null) {
+			config.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+		}
+		if (maxWaitMillis != null) {
+			config.setMaxWaitMillis(maxWaitMillis);
+		}
+		if (blockWhenExhausted != null) {
+			config.setBlockWhenExhausted(blockWhenExhausted);
+		}
+		return config;
+	}
+
+	@Bean
+	public AuthorizationRulesService authorizationRulesService(AuthorizationRulesRepository authorizationRulesRepository) {
+		return new DefaultAuthorizationRulesService(authorizationRulesRepository);
 	}
 
 	@Bean
 	public Authenticator<String, AuthorizationInfo> authenticator(@Value("${auth.audience}") String audience,
-			TokenParser tokenParser) {
-		return new BearerTokenAuthenticator(audience, authorizationRulesService(), tokenParser);
+			TokenParser tokenParser, AuthorizationRulesService authorizationRulesService) {
+		return new BearerTokenAuthenticator(audience, authorizationRulesService, tokenParser);
 	}
 
 	@Bean(name = "authProvider")
