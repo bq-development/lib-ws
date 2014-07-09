@@ -56,8 +56,8 @@ public class AuthorizationIoc {
 
 	@Bean
 	public JedisConnectionFactory jedisConnectionFactory(JedisPoolConfig jedisPoolConfig,
-			@Value("auth.redis.host") String host, @Value("auth.redis.port") Integer port,
-			@Value("auth.redis.password") String password) {
+			@Value("${auth.redis.host:@null}") String host, @Value("${auth.redis.port:@null}") Integer port,
+			@Value("${auth.redis.password:@null}") String password) {
 		JedisConnectionFactory connFactory = new JedisConnectionFactory(jedisPoolConfig);
 		if (host != null) {
 			connFactory.setHostName(host);
@@ -72,15 +72,16 @@ public class AuthorizationIoc {
 	}
 
 	@Bean
-	public JedisPoolConfig jedisPoolConfig(@Value("auth.redis.maxIdle") Integer maxIdle,
-			@Value("auth.redis.maxTotal") Integer maxTotal, @Value("auth.redis.minIdle") Integer minIdle,
-			@Value("auth.redis.testOnBorrow") Boolean testOnBorrow,
-			@Value("auth.redis.testOnReturn") Boolean testOnReturn,
-			@Value("auth.redis.testWhileIdle") Boolean testWhileIdle,
-			@Value("auth.redis.numTestsPerEvictionRun") Integer numTestsPerEvictionRun,
-			@Value("auth.redis.maxWaitMillis") Long maxWaitMillis,
-			@Value("auth.redis.timeBetweenEvictionRunsMillis") Long timeBetweenEvictionRunsMillis,
-			@Value("auth.redis.blockWhenExhausted") Boolean blockWhenExhausted) {
+	public JedisPoolConfig jedisPoolConfig(@Value("${auth.redis.maxIdle:@null}") Integer maxIdle,
+			@Value("${auth.redis.maxTotal:@null}") Integer maxTotal,
+			@Value("${auth.redis.minIdle:@null}") Integer minIdle,
+			@Value("${auth.redis.testOnBorrow:@null}") Boolean testOnBorrow,
+			@Value("${auth.redis.testOnReturn:@null}") Boolean testOnReturn,
+			@Value("${auth.redis.testWhileIdle:@null}") Boolean testWhileIdle,
+			@Value("${auth.redis.numTestsPerEvictionRun:@null}") Integer numTestsPerEvictionRun,
+			@Value("${auth.redis.maxWaitMillis:@null}") Long maxWaitMillis,
+			@Value("${auth.redis.timeBetweenEvictionRunsMillis:@null}") Long timeBetweenEvictionRunsMillis,
+			@Value("${auth.redis.blockWhenExhausted:@null}") Boolean blockWhenExhausted) {
 		JedisPoolConfig config = new JedisPoolConfig();
 		if (maxIdle != null) {
 			config.setMaxIdle(maxIdle);
