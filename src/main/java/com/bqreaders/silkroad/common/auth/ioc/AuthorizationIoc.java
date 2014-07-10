@@ -57,7 +57,7 @@ public class AuthorizationIoc {
 	@Bean
 	public JedisConnectionFactory jedisConnectionFactory(JedisPoolConfig jedisPoolConfig,
 			@Value("${auth.redis.host:@null}") String host, @Value("${auth.redis.port:@null}") Integer port,
-			@Value("${auth.redis.password:@null}") String password) {
+			@Value("${auth.redis.password:}") String password) {
 		JedisConnectionFactory connFactory = new JedisConnectionFactory(jedisPoolConfig);
 		if (host != null) {
 			connFactory.setHostName(host);
