@@ -59,14 +59,12 @@ public class AuthorizationIoc {
 			@Value("${auth.redis.host:@null}") String host, @Value("${auth.redis.port:@null}") Integer port,
 			@Value("${auth.redis.password:}") String password) {
 		JedisConnectionFactory connFactory = new JedisConnectionFactory(jedisPoolConfig);
+        connFactory.setPassword(password);
 		if (host != null) {
 			connFactory.setHostName(host);
 		}
 		if (port != null) {
 			connFactory.setPort(port);
-		}
-		if (password != null) {
-			connFactory.setPassword(password);
 		}
 		return connFactory;
 	}
