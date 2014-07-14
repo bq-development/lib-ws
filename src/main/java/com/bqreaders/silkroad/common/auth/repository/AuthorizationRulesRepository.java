@@ -3,9 +3,9 @@
  */
 package com.bqreaders.silkroad.common.auth.repository;
 
-import java.util.Set;
-
 import com.google.gson.JsonObject;
+
+import java.util.Set;
 
 /**
  * @author Alexander De Leon
@@ -29,4 +29,5 @@ public interface AuthorizationRulesRepository {
 
 	String getKeyForAuthorizationRules(String token, String key);
 
+    void deleteByToken(String token);
 }

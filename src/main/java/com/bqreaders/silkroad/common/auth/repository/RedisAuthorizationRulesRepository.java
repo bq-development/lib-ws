@@ -1,12 +1,11 @@
 package com.bqreaders.silkroad.common.auth.repository;
 
+import com.google.gson.JsonObject;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import java.text.MessageFormat;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.data.redis.core.RedisTemplate;
-
-import com.google.gson.JsonObject;
 
 /**
  * @author Alberto J. Rubio
@@ -60,6 +59,12 @@ public class RedisAuthorizationRulesRepository implements AuthorizationRulesRepo
 	@Override
 	public boolean existsRules(String key) {
 		return !redisTemplate.keys(key).isEmpty();
-
 	}
+
+    @Override
+    public void deleteByToken(String token) {
+        String patternToken = MessageFormat.format(AUTHORIZATION_RULES_KEY, token, "*");
+        Set<String> keysToDelete = redisTemplate.keys(patternToken);
+        redisTemplate.delete(keysToDelete);
+    }
 }
