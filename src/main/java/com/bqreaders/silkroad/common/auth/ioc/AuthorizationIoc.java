@@ -24,6 +24,7 @@ import com.bqreaders.silkroad.common.auth.BearerTokenAuthenticator;
 import com.bqreaders.silkroad.common.auth.DefaultAuthorizationRulesService;
 import com.bqreaders.silkroad.common.auth.repository.AuthorizationRulesRepository;
 import com.bqreaders.silkroad.common.auth.repository.RedisAuthorizationRulesRepository;
+import com.bqreaders.silkroad.common.health.AuthorizationRedisHealthCheck;
 import com.bqreaders.silkroad.common.redis.GsonRedisSerializer;
 import com.google.gson.JsonObject;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
@@ -140,6 +141,11 @@ public class AuthorizationIoc {
 			LOG.warn("Authorization validation is disabled. The systen is in a INSECURE mode");
 			return emptyFilter();
 		}
+	}
+
+	@Bean
+	public AuthorizationRedisHealthCheck getAuthorizationRedisHealthCheck() {
+		return new AuthorizationRedisHealthCheck(redisTemplate());
 	}
 
 	private ContainerRequestFilter emptyFilter() {
