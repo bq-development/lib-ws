@@ -60,7 +60,7 @@ public class AuthorizationIoc {
 			@Value("${auth.redis.host:@null}") String host, @Value("${auth.redis.port:@null}") Integer port,
 			@Value("${auth.redis.password:}") String password) {
 		JedisConnectionFactory connFactory = new JedisConnectionFactory(jedisPoolConfig);
-        connFactory.setPassword(password);
+		connFactory.setPassword(password);
 		if (host != null) {
 			connFactory.setHostName(host);
 		}
@@ -144,8 +144,9 @@ public class AuthorizationIoc {
 	}
 
 	@Bean
-	public AuthorizationRedisHealthCheck getAuthorizationRedisHealthCheck() {
-		return new AuthorizationRedisHealthCheck(redisTemplate());
+	public AuthorizationRedisHealthCheck getAuthorizationRedisHealthCheck(
+			RedisTemplate<String, JsonObject> redisTemplate) {
+		return new AuthorizationRedisHealthCheck(redisTemplate);
 	}
 
 	private ContainerRequestFilter emptyFilter() {
