@@ -11,11 +11,10 @@ import com.yammer.metrics.core.HealthCheck;
  */
 public class AuthorizationRedisHealthCheck extends HealthCheck {
 
-	private final static String NAME = "Redis";
 	private final RedisTemplate<String, JsonObject> redisTemplate;
 
 	public AuthorizationRedisHealthCheck(RedisTemplate<String, JsonObject> redisTemplate) {
-		super(NAME);
+		super("redis");
 		this.redisTemplate = redisTemplate;
 	}
 
