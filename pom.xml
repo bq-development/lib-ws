@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.bqreaders.lib</groupId>
             <artifactId>token</artifactId>
-            <version>1.5.1</version>
+			<version>1.6.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-tx</artifactId>
