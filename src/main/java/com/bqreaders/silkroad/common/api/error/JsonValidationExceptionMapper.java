@@ -54,7 +54,7 @@ public class JsonValidationExceptionMapper implements ExceptionMapper<InvalidEnt
 		@Override
 		public Response toResponse(JsonProcessingException exception) {
 			return JsonValidationExceptionMapper.this.toResponse(new InvalidEntityException(exception.getMessage(),
-					Arrays.asList("Json error at " + exception.getLocation().toString())));
+					Arrays.asList("Json error at " + exception.getLocation())));
 		}
 
 	}
