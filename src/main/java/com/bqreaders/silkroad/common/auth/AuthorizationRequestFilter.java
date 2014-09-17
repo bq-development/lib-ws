@@ -3,23 +3,8 @@
  */
 package com.bqreaders.silkroad.common.auth;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.bqreaders.silkroad.common.model.Error;
 import com.bqreaders.lib.token.TokenInfo;
+import com.bqreaders.silkroad.common.model.Error;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -31,12 +16,26 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.yammer.dropwizard.auth.Auth;
 import com.yammer.dropwizard.auth.oauth.OAuthProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.lang.annotation.Annotation;
+import java.util.Set;
+
+import static java.util.stream.StreamSupport.stream;
 
 /**
- * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the {@link com.yammer.dropwizard.auth.oauth.OAuthProvider} class to obtain an
- * instance of {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo}. The filter is configured to only verify the set of request whose path matches
- * the specified pattern. It validates only access rules of type <b>http_access</b>. If request cannot proceed, it
- * returns a HTTP error 401 without any error information.
+ * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the
+ * {@link com.yammer.dropwizard.auth.oauth.OAuthProvider} class to obtain an instance of
+ * {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo}. The filter is configured to only verify the set of
+ * request whose path matches the specified pattern. It validates only access rules of type <b>http_access</b>. If
+ * request cannot proceed, it returns a HTTP error 401 without any error information.
  * 
  * @author Alexander De Leon
  * 
@@ -126,11 +125,12 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 			return false;
 		}
 		JsonArray mediaTypesArray = input.get("mediaTypes").getAsJsonArray();
-		List<MediaType> mediaTypes = new ArrayList<MediaType>(mediaTypesArray.size());
-		for (JsonElement mediaType : mediaTypesArray) {
-			mediaTypes.add(MediaType.valueOf(mediaType.getAsString()));
-		}
-		return request.getAcceptableMediaType(mediaTypes) != null;
+        MediaType requestMediaType = request.getMediaType();
+
+        return stream(mediaTypesArray.spliterator(), true).anyMatch(mediatypeJsonElement -> {
+            return requestMediaType.isCompatible(MediaType.valueOf(mediatypeJsonElement.getAsString()));
+        });
+
 	}
 
 	private boolean matchesUriPath(String path, JsonObject input) {
