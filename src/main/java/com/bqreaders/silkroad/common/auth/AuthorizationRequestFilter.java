@@ -127,6 +127,10 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 		JsonArray mediaTypesArray = input.get("mediaTypes").getAsJsonArray();
         MediaType requestMediaType = request.getMediaType();
 
+        if(requestMediaType == null) {
+            return false;
+        }
+
         return stream(mediaTypesArray.spliterator(), true).anyMatch(mediatypeJsonElement -> {
             return requestMediaType.isCompatible(MediaType.valueOf(mediatypeJsonElement.getAsString()));
         });
