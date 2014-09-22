@@ -3,6 +3,23 @@
  */
 package com.bqreaders.silkroad.common.auth;
 
+import static java.util.stream.StreamSupport.stream;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.bqreaders.lib.token.TokenInfo;
 import com.bqreaders.silkroad.common.model.Error;
 import com.google.common.base.Predicate;
@@ -16,19 +33,6 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.yammer.dropwizard.auth.Auth;
 import com.yammer.dropwizard.auth.oauth.OAuthProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the
@@ -125,16 +129,11 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 			return false;
 		}
 		JsonArray mediaTypesArray = input.get("mediaTypes").getAsJsonArray();
-        MediaType requestMediaType = request.getMediaType();
+		List<MediaType> mediaTypes = stream(mediaTypesArray.spliterator(), true).map(
+				mediatypeJsonElement -> MediaType.valueOf(mediatypeJsonElement.getAsString())).collect(
+				Collectors.toList());
 
-        if(requestMediaType == null) {
-            return false;
-        }
-
-        return stream(mediaTypesArray.spliterator(), true).anyMatch(mediatypeJsonElement -> {
-            return requestMediaType.isCompatible(MediaType.valueOf(mediatypeJsonElement.getAsString()));
-        });
-
+		return request.getAcceptableMediaType(mediaTypes) != null;
 	}
 
 	private boolean matchesUriPath(String path, JsonObject input) {
