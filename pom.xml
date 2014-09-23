@@ -9,13 +9,13 @@
 
     <groupId>com.bqreaders.lib</groupId>
     <artifactId>ws-common</artifactId>
-    <version>1.10.0-SNAPSHOT</version>
+    <version>1.9.3</version>
     <name>ws-common</name>
 
     <scm>
         <connection>scm:git:ssh://bq-jenkins@gitent-scm.com/git/bqreaders/lib-ws-common</connection>
         <developerConnection>scm:git:ssh://bq-jenkins@gitent-scm.com/git/bqreaders/lib-ws-common</developerConnection>
-        <tag>HEAD</tag>
+        <tag>ws-common-1.9.3</tag>
     </scm>
 
     <properties>
