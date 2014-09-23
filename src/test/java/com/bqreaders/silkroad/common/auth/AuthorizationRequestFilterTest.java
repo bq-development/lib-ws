@@ -86,10 +86,23 @@ public class AuthorizationRequestFilterTest {
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
 		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
-		when(requestMock.getAcceptableMediaType(Arrays.asList(MediaType.APPLICATION_JSON_TYPE))).thenReturn(
-				MediaType.APPLICATION_JSON_TYPE);
+		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRules(jsonParser.parse(
 				"{\"type\":\"http_access\", \"mediaTypes\":[ \"application/json\"], \"methods\":[\"GET\"], \"uri\": \""
+						+ TEST_PATH + "\"}").getAsJsonObject());
+		assertThat(filter.filter(requestMock)).isSameAs(requestMock);
+	}
+
+	@Test
+	public void testHttpAccessRuleWithGenericMediaType() {
+		TokenReader tokenReader = mock(TokenReader.class);
+		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		stubRequest(TEST_PATH, HttpMethod.GET);
+		when(requestMock.getAcceptableMediaTypes()).thenReturn(
+				Arrays.asList(MediaType.TEXT_HTML_TYPE, MediaType.APPLICATION_JSON_TYPE));
+		stubRules(jsonParser
+				.parse("{\"type\":\"http_access\", \"mediaTypes\":[ \"music/mp3\",\"text/plain\",\"application/*\"], \"methods\":[\"GET\"], \"uri\": \""
 						+ TEST_PATH + "\"}").getAsJsonObject());
 		assertThat(filter.filter(requestMock)).isSameAs(requestMock);
 	}
@@ -98,8 +111,7 @@ public class AuthorizationRequestFilterTest {
 	public void testNoRules() {
 		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
-		when(requestMock.getAcceptableMediaType(Arrays.asList(MediaType.APPLICATION_JSON_TYPE))).thenReturn(
-				MediaType.APPLICATION_JSON_TYPE);
+		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRules(); // no rules
 		assertThat(filter.filter(requestMock)).isSameAs(requestMock);
 	}
@@ -112,8 +124,7 @@ public class AuthorizationRequestFilterTest {
 		when(tokenMock.getUserId()).thenReturn(TEST_USER);
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
 		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
-		when(requestMock.getAcceptableMediaType(Arrays.asList(MediaType.APPLICATION_JSON_TYPE))).thenReturn(
-				MediaType.APPLICATION_JSON_TYPE);
+		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		stubRules(jsonParser.parse(
 				"{\"type\":\"http_access\", \"mediaTypes\":[ \"application/json\"], \"methods\":[\"GET\"], \"uri\": \""

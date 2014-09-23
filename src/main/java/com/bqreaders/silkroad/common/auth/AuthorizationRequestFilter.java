@@ -6,9 +6,7 @@ package com.bqreaders.silkroad.common.auth;
 import static java.util.stream.StreamSupport.stream;
 
 import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
@@ -129,11 +127,17 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 			return false;
 		}
 		JsonArray mediaTypesArray = input.get("mediaTypes").getAsJsonArray();
-		List<MediaType> mediaTypes = stream(mediaTypesArray.spliterator(), true).map(
-				mediatypeJsonElement -> MediaType.valueOf(mediatypeJsonElement.getAsString())).collect(
-				Collectors.toList());
 
-		return request.getAcceptableMediaType(mediaTypes) != null;
+		for (MediaType mediaType : request.getAcceptableMediaTypes()) {
+			if (stream(mediaTypesArray.spliterator(), true).map(
+					mediatypeJsonElement -> MediaType.valueOf(mediatypeJsonElement.getAsString())).anyMatch(
+					ruleMediaType -> {
+						return mediaType.isCompatible(ruleMediaType);
+					})) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean matchesUriPath(String path, JsonObject input) {
