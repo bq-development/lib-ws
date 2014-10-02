@@ -14,6 +14,7 @@ public class ErrorResponseFactory {
 	private static final int METHOD_NOT_ALLOWED_STATUS = 405;
 	private static final int INVALID_ENTITY = 422;
 	private static final int RESOURCE_LOCKED = 423;
+	private static final int BAD_GATEWAY = 502;
 
 	private static final Error DEFAULT_FORBIDDEN_ERROR = new Error("forbidden", ErrorMessage.FORBIDDEN.getMessage());
 	private static final Error DEFAULT_UNAUTHORIZED_ERROR = new Error("unauthorized",
@@ -24,7 +25,7 @@ public class ErrorResponseFactory {
 	private static final Error DEFAULT_NOT_FOUND_ERROR = new Error("not_found", ErrorMessage.NOT_FOUND.getMessage());
 	private static final Error DEFAULT_BAD_REQUEST_ERROR = new Error("bad_request",
 			ErrorMessage.BAD_REQUEST.getMessage());
-
+	private static final Error DEFAULT_BAD_GATEWAY = new Error("bad_gateway", ErrorMessage.BAD_GATEWAY.getMessage());
 	private static ErrorResponseFactory instance;
 
 	public static ErrorResponseFactory getInstance() {
@@ -44,6 +45,10 @@ public class ErrorResponseFactory {
 
 	public Response serverError(Throwable exception) {
 		return serverError(new Error("internal_server_error", exception.getMessage()));
+	}
+
+	public Response badGateway() {
+		return badGateway(DEFAULT_BAD_GATEWAY);
 	}
 
 	public Response badRequest() {
@@ -121,6 +126,10 @@ public class ErrorResponseFactory {
 
 	public Response serverError(Error error) {
 		return jsonResponse(error, Status.INTERNAL_SERVER_ERROR);
+	}
+
+	public Response badGateway(Error error) {
+		return jsonResponse(error, BAD_GATEWAY);
 	}
 
 	private Response jsonResponse(Error error, Status status) {

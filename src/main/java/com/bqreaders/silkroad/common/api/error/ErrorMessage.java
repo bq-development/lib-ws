@@ -8,6 +8,7 @@ import java.text.MessageFormat;
 public enum ErrorMessage {
 
 	BAD_REQUEST("Bad Request"),
+	BAD_GATEWAY("Bad Gateway"),
 	NOT_FOUND("Not found"),
 	NOT_ALLOWED("Method not allowed"),
 	CONFLICT("Conflict"),
