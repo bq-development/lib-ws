@@ -21,6 +21,7 @@ import com.bqreaders.silkroad.common.auth.AuthorizationInfo;
 import com.bqreaders.silkroad.common.auth.AuthorizationRequestFilter;
 import com.bqreaders.silkroad.common.auth.AuthorizationRulesService;
 import com.bqreaders.silkroad.common.auth.BearerTokenAuthenticator;
+import com.bqreaders.silkroad.common.auth.CookieOAuthProvider;
 import com.bqreaders.silkroad.common.auth.DefaultAuthorizationRulesService;
 import com.bqreaders.silkroad.common.auth.repository.AuthorizationRulesRepository;
 import com.bqreaders.silkroad.common.auth.repository.RedisAuthorizationRulesRepository;
@@ -132,11 +133,18 @@ public class AuthorizationIoc {
 		return new OAuthProvider<>(authenticator, realm);
 	}
 
+	@Bean(name = "cookieAuthProvider")
+	public CookieOAuthProvider<AuthorizationInfo> getCookieOAuthProvider(
+			Authenticator<String, AuthorizationInfo> authenticator, @Value("${auth.realm}") String realm) {
+		return new CookieOAuthProvider<>(authenticator, realm);
+	}
+
 	@Bean
 	public ContainerRequestFilter getAuthorizationRequestFileter(OAuthProvider<AuthorizationInfo> oauthProvider,
-			@Value("${auth.enabled}") boolean authEnabled, @Value("${auth.securePath}") String securePath) {
+			CookieOAuthProvider<AuthorizationInfo> cookieOauthProvider, @Value("${auth.enabled}") boolean authEnabled,
+			@Value("${auth.securePath}") String securePath) {
 		if (authEnabled) {
-			return new AuthorizationRequestFilter(oauthProvider, securePath);
+			return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, securePath);
 		} else {
 			LOG.warn("Authorization validation is disabled. The systen is in a INSECURE mode");
 			return emptyFilter();

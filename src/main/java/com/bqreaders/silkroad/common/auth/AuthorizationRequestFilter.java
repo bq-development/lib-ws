@@ -52,23 +52,30 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 	@Context
 	private HttpContext context;
 
-	private final OAuthProvider<AuthorizationInfo> provider;
+	private final OAuthProvider<AuthorizationInfo> oAuthProvider;
+	private final CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider;
 	private final String pathPattern;
 
-	public AuthorizationRequestFilter(OAuthProvider<AuthorizationInfo> provider, String pathPattern) {
-		this.provider = provider;
+	public AuthorizationRequestFilter(OAuthProvider<AuthorizationInfo> provider,
+			CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider, String pathPattern) {
+		this.oAuthProvider = provider;
+		this.cookieOAuthProvider = cookieOAuthProvider;
 		this.pathPattern = pathPattern;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
 		if (request.getPath().matches(pathPattern)) {
 			// OPTIONS is always allowed (for CORS)
 			if (!request.getMethod().equals(HttpMethod.OPTIONS)) {
-				// Obtain the authroization information from the bearer token.
-				@SuppressWarnings("unchecked")
-				AuthorizationInfo info = ((AbstractHttpContextInjectable<AuthorizationInfo>) provider.getInjectable(
-						null, getAuth(), null)).getValue(context);
+				// Obtain the authorization information from the bearer token.
+				AuthorizationInfo info = ((AbstractHttpContextInjectable<AuthorizationInfo>) oAuthProvider
+						.getInjectable(null, getAuth(false), null)).getValue(context);
+				if (info == null) {
+					info = ((AbstractHttpContextInjectable<AuthorizationInfo>) cookieOAuthProvider.getInjectable(null,
+							getAuth(true), null)).getValue(context);
+				}
 				// Check rules to verify access
 				checkAccessRules(info, request);
 			}
@@ -148,7 +155,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 		return path.matches(input.get("uri").getAsString());
 	}
 
-	private Auth getAuth() {
+	private Auth getAuth(boolean b) {
 		return new Auth() {
 
 			@Override
@@ -158,7 +165,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
 			@Override
 			public boolean required() {
-				return true;
+				return b;
 			}
 		};
 	}

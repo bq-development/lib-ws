@@ -42,13 +42,16 @@ public class AuthorizationRequestFilterTest {
 	private static final String TEST_USER = "user";
 
 	private OAuthProvider<AuthorizationInfo> providerMock;
+	private CookieOAuthProvider<AuthorizationInfo> cookieProviderMock;
 	private ContainerRequest requestMock;
 	private AuthorizationInfo authorizationInfoMock;
 	private final JsonParser jsonParser = new JsonParser();
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
 		providerMock = mock(OAuthProvider.class);
+		cookieProviderMock = mock(CookieOAuthProvider.class);
 		requestMock = mock(ContainerRequest.class);
 		authorizationInfoMock = mock(AuthorizationInfo.class);
 		AbstractHttpContextInjectable<AuthorizationInfo> injectableMock = mock(AbstractHttpContextInjectable.class);
@@ -61,21 +64,22 @@ public class AuthorizationRequestFilterTest {
 
 	@Test(expected = WebApplicationException.class)
 	public void testPatternMatches() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		filter.filter(requestMock);
 	}
 
 	@Test
 	public void testPatternNoMatches() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, "/nomach/.*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock,
+				"/nomach/.*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		assertThat(filter.filter(requestMock)).isSameAs(requestMock);
 	}
 
 	@Test
 	public void testCORSIsSkiped() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.OPTIONS);
 		assertThat(filter.filter(requestMock)).isSameAs(requestMock);
 	}
@@ -84,7 +88,7 @@ public class AuthorizationRequestFilterTest {
 	public void testHttpAccessRule() {
 		TokenReader tokenReader = mock(TokenReader.class);
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRules(jsonParser.parse(
@@ -97,7 +101,7 @@ public class AuthorizationRequestFilterTest {
 	public void testHttpAccessRuleWithGenericMediaType() {
 		TokenReader tokenReader = mock(TokenReader.class);
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		when(requestMock.getAcceptableMediaTypes()).thenReturn(
 				Arrays.asList(MediaType.TEXT_HTML_TYPE, MediaType.APPLICATION_JSON_TYPE));
@@ -109,7 +113,7 @@ public class AuthorizationRequestFilterTest {
 
 	@Test(expected = WebApplicationException.class)
 	public void testNoRules() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRules(); // no rules
@@ -123,7 +127,7 @@ public class AuthorizationRequestFilterTest {
 		when(tokenReader.getInfo()).thenReturn(tokenMock);
 		when(tokenMock.getUserId()).thenReturn(TEST_USER);
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		stubRules(jsonParser.parse(
@@ -139,7 +143,7 @@ public class AuthorizationRequestFilterTest {
 		when(tokenReader.getInfo()).thenReturn(tokenMock);
 		when(tokenMock.getUserId()).thenReturn(null);
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
 		when(requestMock.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		stubRules(jsonParser.parse(
