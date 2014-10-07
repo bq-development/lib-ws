@@ -135,8 +135,8 @@ public class AuthorizationIoc {
 
 	@Bean(name = "cookieAuthProvider")
 	public CookieOAuthProvider<AuthorizationInfo> getCookieOAuthProvider(
-			Authenticator<String, AuthorizationInfo> authenticator, @Value("${auth.realm}") String realm) {
-		return new CookieOAuthProvider<>(authenticator, realm);
+			Authenticator<String, AuthorizationInfo> authenticator) {
+		return new CookieOAuthProvider<>(authenticator);
 	}
 
 	@Bean

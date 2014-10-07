@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.HttpHeaders;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +35,6 @@ public class CookieOAuthProviderTest {
 
 	private Authenticator<String, TestClass> authenticator;
 
-	private final String realm = "asdf";
-
 	private Cookie cookie;
 
 	private HttpContext context;
@@ -51,7 +48,7 @@ public class CookieOAuthProviderTest {
 		authenticator = mock(Authenticator.class);
 		Optional<TestClass> value = Optional.of(new TestClass());
 		when(authenticator.authenticate(TOKEN)).thenReturn(value);
-		cookieOAuthProvider = new CookieOAuthProvider<>(authenticator, realm);
+		cookieOAuthProvider = new CookieOAuthProvider<>(authenticator);
 
 		a = mock(Auth.class);
 		when(a.required()).thenReturn(true);
@@ -64,7 +61,7 @@ public class CookieOAuthProviderTest {
 		when(context.getRequest()).thenReturn(request);
 		Map<String, Cookie> cookies = new HashMap<String, Cookie>() {
 			{
-				put(HttpHeaders.AUTHORIZATION, cookie);
+				put(TOKEN, cookie);
 			}
 		};
 		when(request.getCookies()).thenReturn(cookies);

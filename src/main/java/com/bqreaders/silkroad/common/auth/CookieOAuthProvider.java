@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -31,16 +30,13 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 
 	private static class CookieOAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
 		private static final Logger LOGGER = LoggerFactory.getLogger(CookieOAuthInjectable.class);
-		private static final String HEADER_NAME = "WWW-Authenticate";
-		private static final String HEADER_VALUE = "Bearer realm=\"%s\"";
+		private static final String COOKIE_KEY = "token";
 
 		private final Authenticator<String, T> authenticator;
-		private final String realm;
 		private final boolean required;
 
-		private CookieOAuthInjectable(Authenticator<String, T> authenticator, String realm, boolean required) {
+		private CookieOAuthInjectable(Authenticator<String, T> authenticator, boolean required) {
 			this.authenticator = authenticator;
-			this.realm = realm;
 			this.required = required;
 		}
 
@@ -49,7 +45,7 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 			try {
 				final Map<String, Cookie> cookies = c.getRequest().getCookies();
 				if (cookies != null) {
-					final Cookie cookie = cookies.get(HttpHeaders.AUTHORIZATION);
+					final Cookie cookie = cookies.get(COOKIE_KEY);
 					if (cookie != null) {
 						final Optional<T> result = authenticator.authenticate(cookie.getValue());
 						if (result.isPresent()) {
@@ -64,7 +60,6 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 
 			if (required) {
 				throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
-						.header(HEADER_NAME, String.format(HEADER_VALUE, realm))
 						.entity("Credentials are required to access this resource.").type(MediaType.TEXT_PLAIN_TYPE)
 						.build());
 			}
@@ -73,7 +68,6 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 	}
 
 	private final Authenticator<String, T> authenticator;
-	private final String realm;
 
 	/**
 	 * Creates a new OAuthProvider with the given {@link Authenticator} and realm.
@@ -83,9 +77,8 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 	 * @param realm
 	 *            the name of the authentication realm
 	 */
-	public CookieOAuthProvider(Authenticator<String, T> authenticator, String realm) {
+	public CookieOAuthProvider(Authenticator<String, T> authenticator) {
 		this.authenticator = authenticator;
-		this.realm = realm;
 	}
 
 	@Override
@@ -95,7 +88,7 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 
 	@Override
 	public Injectable<?> getInjectable(ComponentContext ic, Auth a, Parameter c) {
-		return new CookieOAuthInjectable<T>(authenticator, realm, a.required());
+		return new CookieOAuthInjectable<T>(authenticator, a.required());
 	}
 
 }
