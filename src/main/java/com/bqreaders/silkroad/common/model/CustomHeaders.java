@@ -5,16 +5,17 @@ package com.bqreaders.silkroad.common.model;
  */
 public enum CustomHeaders {
 
-    NO_REDIRECT_HEADER("No-Redirect");
+	NO_REDIRECT_HEADER("No-Redirect"),
+	REQUEST_COOKIE_HEADER("RequestCookie");
 
-    private final String value;
+	private final String value;
 
-    private CustomHeaders(String value) {
-        this.value = value;
-    }
+	private CustomHeaders(String value) {
+		this.value = value;
+	}
 
-    @Override
-    public String toString() {
-        return value;
-    }
+	@Override
+	public String toString() {
+		return value;
+	}
 }
