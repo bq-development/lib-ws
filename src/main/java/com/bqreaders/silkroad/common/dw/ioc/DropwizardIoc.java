@@ -16,6 +16,7 @@ import com.yammer.dropwizard.config.HttpConfiguration;
 import com.yammer.dropwizard.config.LoggingConfiguration;
 import com.yammer.dropwizard.config.LoggingConfiguration.ConsoleConfiguration;
 import com.yammer.dropwizard.config.LoggingConfiguration.FileConfiguration;
+import com.yammer.dropwizard.config.LoggingConfiguration.SyslogConfiguration;
 
 /**
  * @author Alexander De Leon
@@ -41,6 +42,7 @@ public class DropwizardIoc {
 		LoggingConfiguration configuration = new LoggingConfiguration();
 		configuration.setLevel(getLogLevel("dw.logging.level", "INFO"));
 		configuration.setConsoleConfiguration(getConsoleConfiguration());
+        configuration.setSyslogConfiguration(getSyslogConfiguration());
 		configuration.setFileConfiguration(getFileConfiguration());
 		return configuration;
 	}
@@ -59,7 +61,14 @@ public class DropwizardIoc {
 		return configuration;
 	}
 
-	private FileConfiguration getFileConfiguration() {
+    private SyslogConfiguration getSyslogConfiguration() {
+        SyslogConfiguration configuration = new SyslogConfiguration();
+        configuration.setEnabled(env.getProperty("dw.logging.syslog.enabled", Boolean.class, true));
+        configuration.setThreshold(getLogLevel("dw.logging.syslog.threshold", "ALL"));
+        return configuration;
+    }
+
+    private FileConfiguration getFileConfiguration() {
 		FileConfiguration configuration = new FileConfiguration();
 		configuration.setEnabled(env.getProperty("dw.logging.file.enabled", Boolean.class, false));
 		configuration.setThreshold(getLogLevel("dw.logging.file.threshold", "ALL"));
