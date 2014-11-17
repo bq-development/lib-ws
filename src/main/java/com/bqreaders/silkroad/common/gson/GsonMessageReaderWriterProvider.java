@@ -8,18 +8,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Arrays;
+import java.util.Collections;
 
+import javax.validation.ConstraintViolationException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.Provider;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.sun.jersey.core.provider.AbstractMessageReaderWriterProvider;
-import com.yammer.dropwizard.validation.InvalidEntityException;
 
 /**
  * Jax-rs {@link javax.ws.rs.ext.Provider} for Gson objects.
@@ -49,7 +48,7 @@ public class GsonMessageReaderWriterProvider extends AbstractMessageReaderWriter
 			JsonElement element = parser.parse(super.readFromAsString(entityStream, mediaType));
 			return element.isJsonNull() ? null : assertType(element, type);
 		} catch (JsonParseException e) {
-			throw new InvalidEntityException("Malformed JSON", Arrays.asList(e.getMessage()));
+			throw new ConstraintViolationException("Malformed JSON:" + e.getMessage(), Collections.emptySet());
 		}
 	}
 
@@ -57,8 +56,8 @@ public class GsonMessageReaderWriterProvider extends AbstractMessageReaderWriter
 		if (type.isAssignableFrom(element.getClass())) {
 			return element;
 		}
-		throw new InvalidEntityException("Malformed JSON", Arrays.asList("Expecting " + type + " but received "
-				+ element.getClass()));
+		throw new ConstraintViolationException("Malformed JSON: " + "Expecting " + type + " but received "
+				+ element.getClass(), Collections.emptySet());
 	}
 
 	@Override

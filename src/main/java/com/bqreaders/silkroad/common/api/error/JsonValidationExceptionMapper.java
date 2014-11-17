@@ -3,22 +3,23 @@
  */
 package com.bqreaders.silkroad.common.api.error;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import com.bqreaders.silkroad.common.model.Error;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.ImmutableList;
-import com.yammer.dropwizard.validation.InvalidEntityException;
 
 /**
  * @author Alexander De Leon
  * 
  */
-public class JsonValidationExceptionMapper implements ExceptionMapper<InvalidEntityException> {
+public class JsonValidationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
 	private final int notProcessableResponseStatus = 422;
 
@@ -35,15 +36,15 @@ public class JsonValidationExceptionMapper implements ExceptionMapper<InvalidEnt
 	}
 
 	@Override
-	public Response toResponse(InvalidEntityException exception) {
+	public Response toResponse(ConstraintViolationException exception) {
 		return Response.status(notProcessableResponseStatus).type(MediaType.APPLICATION_JSON)
-				.entity(new Error(error, generateDescription(exception.getErrors()))).build();
+				.entity(new Error(error, generateDescription(exception.getConstraintViolations()))).build();
 	}
 
-	private String generateDescription(ImmutableList<String> errors) {
+	private String generateDescription(Set<ConstraintViolation<?>> errors) {
 		StringBuilder builder = new StringBuilder("Unprocessable Entity:");
-		for (String errorMessage : errors) {
-			builder.append(" ").append(errorMessage).append(",");
+		for (ConstraintViolation errorMessage : errors) {
+			builder.append(" ").append(errorMessage.getMessage()).append(",");
 		}
 		builder.deleteCharAt(builder.length() - 1);
 		return builder.toString();
@@ -53,8 +54,8 @@ public class JsonValidationExceptionMapper implements ExceptionMapper<InvalidEnt
 
 		@Override
 		public Response toResponse(JsonProcessingException exception) {
-			return JsonValidationExceptionMapper.this.toResponse(new InvalidEntityException(exception.getMessage(),
-					Arrays.asList("Json error at " + exception.getLocation())));
+			return JsonValidationExceptionMapper.this.toResponse(new ConstraintViolationException(exception
+					.getMessage() +"Json error at " + exception.getLocation(), Collections.emptySet()));
 		}
 
 	}

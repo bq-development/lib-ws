@@ -4,11 +4,23 @@
 package com.bqreaders.silkroad.common.cli;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
+import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
+import io.dropwizard.logging.LoggingFactory;
+import io.dropwizard.server.ServerFactory;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -24,17 +36,6 @@ import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.inject.InjectableProvider;
-import com.yammer.dropwizard.Service;
-import com.yammer.dropwizard.config.Bootstrap;
-import com.yammer.dropwizard.config.Configuration;
-import com.yammer.dropwizard.config.Environment;
-import com.yammer.dropwizard.config.HttpConfiguration;
-import com.yammer.dropwizard.config.LoggingConfiguration;
-import com.yammer.dropwizard.config.LoggingFactory;
-import com.yammer.dropwizard.jersey.InvalidEntityExceptionMapper;
-import com.yammer.dropwizard.jersey.JsonProcessingExceptionMapper;
-import com.yammer.dropwizard.json.ObjectMapperFactory;
-import com.yammer.dropwizard.util.Generics;
 
 /**
  * @author Alexander De Leon
@@ -44,15 +45,13 @@ public abstract class ServiceRunner<T> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceRunner.class);
 
-	private final Service<Configuration> service = new Service<Configuration>() {
+	private final Application<Configuration> application = new Application<Configuration>() {
 
 		@Override
 		public void initialize(Bootstrap<Configuration> bootstrap) {
-			String name = getName();
-			bootstrap.setName(name);
-			LOG.info("Initializing ${conf.namespace} as {}", name);
-			System.setProperty("conf.namespace", name);
-			configureObjectMapperFactory(bootstrap.getObjectMapperFactory());
+			LOG.info("Initializing ${conf.namespace} as {}", getName());
+			System.setProperty("conf.namespace", getName());
+			configureObjectMapper(bootstrap.getObjectMapper());
 			bootstrap(bootstrap);
 		}
 
@@ -67,7 +66,7 @@ public abstract class ServiceRunner<T> {
 	};
 
 	public final void run(String[] arguments) throws Exception {
-		service.run(arguments);
+		application.run(arguments);
 	}
 
 	protected abstract String getName();
@@ -82,9 +81,9 @@ public abstract class ServiceRunner<T> {
 	}
 
 	/**
-	 * Override by subclasses to configure {@link com.yammer.dropwizard.json.ObjectMapperFactory}
+	 * Override by subclasses to configure {@link com.fasterxml.jackson.databind.ObjectMapper}
 	 */
-	protected void configureObjectMapperFactory(ObjectMapperFactory objectMapperFactory) {
+	protected void configureObjectMapper(ObjectMapper objectMapperFactory) {
 		objectMapperFactory.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
@@ -95,22 +94,20 @@ public abstract class ServiceRunner<T> {
 	}
 
 	private void configureDefaultProviders(Environment environment) {
-		environment.addProvider(new GsonMessageReaderWriterProvider());
+		environment.jersey().register(new GsonMessageReaderWriterProvider());
 	}
 
 	private void configureDropWizzard(Configuration configuration, ApplicationContext applicationContext) {
-		configuration.setHttpConfiguration(applicationContext.getBean(HttpConfiguration.class));
-		configuration.setLoggingConfiguration(applicationContext.getBean(LoggingConfiguration.class));
-		new LoggingFactory(configuration.getLoggingConfiguration(), getName()).configure();
+		configuration.setServerFactory(applicationContext.getBean(ServerFactory.class));
+		configuration.setLoggingFactory(applicationContext.getBean(LoggingFactory.class));
 	}
 
 	private void configureFiltersAndInterceptors(Environment environment, ApplicationContext applicationContext) {
 		// Replace exception mappers with custom implementations
-		replaceExceptionMapper(environment, InvalidEntityExceptionMapper.class, new JsonValidationExceptionMapper());
-		replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class,
-				new JsonValidationExceptionMapper().new JacksonAdapter());
-		environment.addProvider(NotFoundExceptionMapper.class);
-		environment.addProvider(GenericExceptionMapper.class);
+		replaceExceptionMapper(environment, ConstraintViolationExceptionMapper.class, new JsonValidationExceptionMapper());
+		replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class, new JsonValidationExceptionMapper().new JacksonAdapter());
+		environment.jersey().register(NotFoundExceptionMapper.class);
+		environment.jersey().register(GenericExceptionMapper.class);
 
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
 
@@ -118,16 +115,16 @@ public abstract class ServiceRunner<T> {
 		List<ContainerRequestFilter> requestFilters = new ArrayList<ContainerRequestFilter>(applicationContext
 				.getBeansOfType(ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
-		environment.setJerseyProperty("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
+		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
 
 		List<ContainerResponseFilter> responseFilters = new ArrayList<ContainerResponseFilter>(applicationContext
 				.getBeansOfType(ContainerResponseFilter.class).values());
 		responseFilters.add(gzipFilter);
-		environment.setJerseyProperty("com.sun.jersey.spi.container.ContainerResponseFilters", responseFilters);
+		environment.jersey().property("com.sun.jersey.spi.container.ContainerResponseFilters", responseFilters);
 
 		Boolean etagEnabled = applicationContext.getEnvironment().getProperty("etag.enabled", Boolean.class);
 		if (etagEnabled == null || etagEnabled.equals(true)) {
-			environment.addFilter(ShallowEtagHeaderFilter.class, "*");
+			environment.getApplicationContext().addFilter(ShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
 		}
 
 		// Configure injectable providers
@@ -137,7 +134,7 @@ public abstract class ServiceRunner<T> {
 			for (@SuppressWarnings("rawtypes")
 			Map.Entry<String, InjectableProvider> entry : providers.entrySet()) {
 				LOG.info("Registering provider: {}", entry.getKey());
-				environment.addProvider(entry.getValue());
+				environment.jersey().register(entry.getValue());
 			}
 		}
 	}
@@ -146,14 +143,14 @@ public abstract class ServiceRunner<T> {
 			Class<? extends ExceptionMapper<? extends Throwable>> exceptionMapperToBeReplaced,
 			ExceptionMapper<? extends Throwable> customExceptionMapper) {
 		Object exceptionMapper = null;
-		for (Object singleton : environment.getJerseyResourceConfig().getSingletons()) {
+		for (Object singleton : environment.jersey().getResourceConfig().getSingletons()) {
 			if (exceptionMapperToBeReplaced.isInstance(singleton)) {
 				exceptionMapper = singleton;
 				break;
 			}
 		}
-		environment.getJerseyResourceConfig().getSingletons().remove(exceptionMapper);
-		environment.addProvider(customExceptionMapper);
+		environment.jersey().getResourceConfig().getSingletons().remove(exceptionMapper);
+		environment.jersey().register(customExceptionMapper);
 	}
 
 	private final Class<T> getIocConfigurationClass() {

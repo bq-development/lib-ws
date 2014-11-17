@@ -11,15 +11,15 @@ import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
-import com.yammer.dropwizard.auth.Auth;
-import com.yammer.dropwizard.auth.Authenticator;
-import com.yammer.dropwizard.auth.basic.BasicCredentials;
+import io.dropwizard.auth.Auth;
+import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.basic.BasicCredentials;
 
 /**
  * @author Alexander De Leon
  *
  */
-public class BasicAuthProvider<T> extends com.yammer.dropwizard.auth.basic.BasicAuthProvider<T> {
+public class BasicAuthProvider<T> extends io.dropwizard.auth.basic.BasicAuthProvider<T> {
 
 	private String realm;
 

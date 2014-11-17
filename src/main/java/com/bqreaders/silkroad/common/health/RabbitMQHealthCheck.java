@@ -1,15 +1,13 @@
 package com.bqreaders.silkroad.common.health;
 
+import com.codahale.metrics.health.HealthCheck;
 import org.springframework.amqp.core.AmqpAdmin;
-
-import com.yammer.metrics.core.HealthCheck;
 
 public class RabbitMQHealthCheck extends HealthCheck {
 
 	private final AmqpAdmin amqpAdmin;
 
 	public RabbitMQHealthCheck(AmqpAdmin amqpAdmin) {
-		super("rabbit");
 		this.amqpAdmin = amqpAdmin;
 	}
 

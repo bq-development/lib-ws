@@ -29,8 +29,8 @@ import com.bqreaders.silkroad.common.health.AuthorizationRedisHealthCheck;
 import com.bqreaders.silkroad.common.redis.GsonRedisSerializer;
 import com.google.gson.JsonObject;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
-import com.yammer.dropwizard.auth.Authenticator;
-import com.yammer.dropwizard.auth.oauth.OAuthProvider;
+import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.oauth.OAuthProvider;
 
 /**
  * @author Alexander De Leon

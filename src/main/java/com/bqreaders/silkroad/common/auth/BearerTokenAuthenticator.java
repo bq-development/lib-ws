@@ -13,14 +13,14 @@ import com.bqreaders.lib.token.parser.TokenParser;
 import com.bqreaders.lib.token.reader.TokenReader;
 import com.google.common.base.Optional;
 import com.google.gson.JsonObject;
-import com.yammer.dropwizard.auth.Auth;
-import com.yammer.dropwizard.auth.AuthenticationException;
-import com.yammer.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.Auth;
+import io.dropwizard.auth.AuthenticationException;
+import io.dropwizard.auth.Authenticator;
 
 /**
- * Implements a the dropwizard's {@link com.yammer.dropwizard.auth.Authenticator} interface to provide an {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo} from the bearer
+ * Implements a the dropwizard's {@link io.dropwizard.auth.Authenticator} interface to provide an {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo} from the bearer
  * token. A resource method can be injected with an instance of {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo} by just annotating the
- * parameter with the {@link com.yammer.dropwizard.auth.Auth} annotation.
+ * parameter with the {@link io.dropwizard.auth.Auth} annotation.
  * 
  * @author Alexander De Leon
  * 

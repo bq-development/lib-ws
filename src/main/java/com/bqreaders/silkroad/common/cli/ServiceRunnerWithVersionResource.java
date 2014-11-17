@@ -5,7 +5,7 @@ package com.bqreaders.silkroad.common.cli;
 
 import com.bqreaders.silkroad.common.api.ArtifactIdVersionResource;
 import com.google.common.util.concurrent.AbstractService;
-import com.yammer.dropwizard.config.Environment;
+import io.dropwizard.setup.Environment;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -24,7 +24,7 @@ public abstract class ServiceRunnerWithVersionResource<T> extends ServiceRunner<
 	 */
 	@Override
 	protected void configureService(Environment environment, ApplicationContext context) {
-		environment.addResource(new ArtifactIdVersionResource(getArtifactId()));
+		environment.jersey().register(new ArtifactIdVersionResource(getArtifactId()));
 	}
 
 	protected abstract String getArtifactId();
