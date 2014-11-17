@@ -1,12 +1,11 @@
 package com.bqreaders.silkroad.common.health;
 
-import com.yammer.metrics.core.HealthCheck;
+
+import com.codahale.metrics.health.HealthCheck;
 
 public class BasicHealthCheck extends HealthCheck {
 
-	public BasicHealthCheck() {
-		super("basic");
-	}
+	public BasicHealthCheck() {}
 
 	@Override
 	protected Result check() {

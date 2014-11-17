@@ -18,9 +18,9 @@ import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
-import com.yammer.dropwizard.auth.Auth;
-import com.yammer.dropwizard.auth.AuthenticationException;
-import com.yammer.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.Auth;
+import io.dropwizard.auth.AuthenticationException;
+import io.dropwizard.auth.Authenticator;
 
 /**
  * @author Rubén Carrasco

@@ -23,7 +23,7 @@ import com.bqreaders.lib.token.reader.TokenReader;
 import com.google.common.base.Optional;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.yammer.dropwizard.auth.AuthenticationException;
+import io.dropwizard.auth.AuthenticationException;
 
 /**
  * @author Alexander De Leon

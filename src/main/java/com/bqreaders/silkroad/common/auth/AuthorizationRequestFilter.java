@@ -29,12 +29,12 @@ import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
-import com.yammer.dropwizard.auth.Auth;
-import com.yammer.dropwizard.auth.oauth.OAuthProvider;
+import io.dropwizard.auth.Auth;
+import io.dropwizard.auth.oauth.OAuthProvider;
 
 /**
  * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the
- * {@link com.yammer.dropwizard.auth.oauth.OAuthProvider} class to obtain an instance of
+ * {@link io.dropwizard.auth.oauth.OAuthProvider} class to obtain an instance of
  * {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo}. The filter is configured to only verify the set of
  * request whose path matches the specified pattern. It validates only access rules of type <b>http_access</b>. If
  * request cannot proceed, it returns a HTTP error 401 without any error information.

@@ -12,9 +12,9 @@ import org.junit.Test;
 
 import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.core.spi.component.ComponentContext;
-import com.yammer.dropwizard.auth.Auth;
-import com.yammer.dropwizard.auth.basic.BasicAuthProvider;
-import com.yammer.dropwizard.auth.oauth.OAuthProvider;
+import io.dropwizard.auth.Auth;
+import io.dropwizard.auth.basic.BasicAuthProvider;
+import io.dropwizard.auth.oauth.OAuthProvider;
 
 /**
  * @author Alexander De Leon

@@ -28,8 +28,8 @@ import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.inject.Injectable;
-import com.yammer.dropwizard.auth.Auth;
-import com.yammer.dropwizard.auth.oauth.OAuthProvider;
+import io.dropwizard.auth.Auth;
+import io.dropwizard.auth.oauth.OAuthProvider;
 
 /**
  * @author Alexander De Leon

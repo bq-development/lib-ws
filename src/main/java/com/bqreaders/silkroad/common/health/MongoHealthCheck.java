@@ -1,14 +1,13 @@
 package com.bqreaders.silkroad.common.health;
 
+import com.codahale.metrics.health.HealthCheck;
 import com.mongodb.MongoClient;
-import com.yammer.metrics.core.HealthCheck;
 
 public class MongoHealthCheck extends HealthCheck {
 
 	private final MongoClient mongoClient;
 
 	public MongoHealthCheck(MongoClient mongoClient) {
-		super("mongo");
 		this.mongoClient = mongoClient;
 	}
 
@@ -17,5 +16,4 @@ public class MongoHealthCheck extends HealthCheck {
 		mongoClient.getDatabaseNames();
 		return Result.healthy();
 	}
-
 }
