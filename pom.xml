@@ -9,7 +9,7 @@
 
     <groupId>com.bqreaders.lib</groupId>
     <artifactId>ws-common</artifactId>
-    <version>1.15.0-SNAPSHOT</version>
+    <version>1.16.0-SNAPSHOT</version>
     <name>ws-common</name>
 
     <scm>
