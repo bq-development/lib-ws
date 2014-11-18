@@ -112,7 +112,7 @@ public abstract class ServiceRunner<T> {
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
 
 		// Configure filters
-		List<ContainerRequestFilter> requestFilters = new ArrayList<ContainerRequestFilter>(applicationContext
+		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext
 				.getBeansOfType(ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);

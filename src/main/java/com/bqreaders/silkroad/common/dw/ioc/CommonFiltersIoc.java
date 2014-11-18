@@ -1,5 +1,6 @@
 package com.bqreaders.silkroad.common.dw.ioc;
 
+import com.bqreaders.silkroad.common.filter.TransformNullBodiesToEmptyObjectsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,11 @@ public class CommonFiltersIoc {
 		return new HeadersQueryParamsFilter(env.getProperty("filter.headersQueryParams.enabled", Boolean.class, false),
 				objectMapper);
 	}
+
+    @Bean
+    public TransformNullBodiesToEmptyObjectsFilter getTransformNullBodiesToEmptyObjecstFilter() {
+        return new TransformNullBodiesToEmptyObjectsFilter();
+    }
 
 	@Bean
 	public ObjectMapper getObjectMapper() {
