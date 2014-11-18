@@ -49,8 +49,6 @@ public abstract class ServiceRunner<T> {
 
 		@Override
 		public void initialize(Bootstrap<Configuration> bootstrap) {
-			LOG.info("Initializing ${conf.namespace} as {}", getName());
-			System.setProperty("conf.namespace", getName());
 			configureObjectMapper(bootstrap.getObjectMapper());
 			bootstrap(bootstrap);
 		}
@@ -66,6 +64,8 @@ public abstract class ServiceRunner<T> {
 	};
 
 	public final void run(String[] arguments) throws Exception {
+		LOG.info("Initializing ${conf.namespace} as {}", getName());
+		System.setProperty("conf.namespace", getName());
 		application.run(arguments);
 	}
 
