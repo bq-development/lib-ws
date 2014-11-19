@@ -12,6 +12,7 @@ import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import com.bqreaders.silkroad.common.filter.TransformNullBodiesToEmptyObjectsFilter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -86,6 +87,7 @@ public abstract class ServiceRunner<T> {
 	 */
 	protected void configureObjectMapper(ObjectMapper objectMapperFactory) {
 		objectMapperFactory.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		objectMapperFactory.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}
 
 	protected ApplicationContext loadSpringContext() {
