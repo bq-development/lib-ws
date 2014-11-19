@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import com.bqreaders.silkroad.common.filter.TransformNullBodiesToEmptyObjectsFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -110,14 +111,16 @@ public abstract class ServiceRunner<T> {
 		environment.jersey().register(GenericExceptionMapper.class);
 
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
+		TransformNullBodiesToEmptyObjectsFilter transformNullBodiesToEmptyObjectsFilter = new TransformNullBodiesToEmptyObjectsFilter();
 
 		// Configure filters
 		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext
 				.getBeansOfType(ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
+		requestFilters.add(transformNullBodiesToEmptyObjectsFilter);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
 
-		List<ContainerResponseFilter> responseFilters = new ArrayList<ContainerResponseFilter>(applicationContext
+		List<ContainerResponseFilter> responseFilters = new ArrayList<>(applicationContext
 				.getBeansOfType(ContainerResponseFilter.class).values());
 		responseFilters.add(gzipFilter);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerResponseFilters", responseFilters);

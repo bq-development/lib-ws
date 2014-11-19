@@ -38,11 +38,6 @@ public class CommonFiltersIoc {
 				objectMapper);
 	}
 
-    @Bean
-    public TransformNullBodiesToEmptyObjectsFilter getTransformNullBodiesToEmptyObjecstFilter() {
-        return new TransformNullBodiesToEmptyObjectsFilter();
-    }
-
 	@Bean
 	public ObjectMapper getObjectMapper() {
 		return new ObjectMapper();

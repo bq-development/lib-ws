@@ -140,7 +140,7 @@ public class AuthorizationIoc {
 	}
 
 	@Bean
-	public ContainerRequestFilter getAuthorizationRequestFileter(OAuthProvider<AuthorizationInfo> oauthProvider,
+	public ContainerRequestFilter getAuthorizationRequestFilter(OAuthProvider<AuthorizationInfo> oauthProvider,
 			CookieOAuthProvider<AuthorizationInfo> cookieOauthProvider, @Value("${auth.enabled}") boolean authEnabled,
 			@Value("${auth.securePath}") String securePath) {
 		if (authEnabled) {
