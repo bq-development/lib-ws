@@ -1,6 +1,5 @@
 package com.bqreaders.silkroad.common.dw.ioc;
 
-import com.bqreaders.silkroad.common.filter.TransformNullBodiesToEmptyObjectsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

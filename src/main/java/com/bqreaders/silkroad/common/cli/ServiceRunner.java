@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
 
-import com.bqreaders.silkroad.common.filter.TransformNullBodiesToEmptyObjectsFilter;
+import com.bqreaders.silkroad.common.json.serialization.SilkroadJacksonMessageBodyProvider;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.Application;
@@ -62,6 +62,7 @@ public abstract class ServiceRunner<T> {
 			configureDropWizzard(configuration, applicationContext);
 			configureFiltersAndInterceptors(environment, applicationContext);
 			configureService(environment, applicationContext);
+			environment.jersey().register(new SilkroadJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
 		}
 	};
 
@@ -113,13 +114,11 @@ public abstract class ServiceRunner<T> {
 		environment.jersey().register(GenericExceptionMapper.class);
 
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
-		TransformNullBodiesToEmptyObjectsFilter transformNullBodiesToEmptyObjectsFilter = new TransformNullBodiesToEmptyObjectsFilter();
 
 		// Configure filters
 		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext
 				.getBeansOfType(ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
-		requestFilters.add(transformNullBodiesToEmptyObjectsFilter);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
 
 		List<ContainerResponseFilter> responseFilters = new ArrayList<>(applicationContext
