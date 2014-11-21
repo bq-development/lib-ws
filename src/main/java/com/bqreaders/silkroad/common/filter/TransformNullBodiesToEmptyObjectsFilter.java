@@ -20,6 +20,10 @@ public class TransformNullBodiesToEmptyObjectsFilter implements ContainerRequest
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
 		MediaType mediaType = request.getMediaType();
+		if (mediaType==null)  {
+			return request;
+		}
+		mediaType = new MediaType(mediaType.getType(), mediaType.getSubtype());
 		String method = request.getMethod();
 		boolean isMethodPostOrPut = ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method));
 		boolean isJSON = (MediaType.APPLICATION_JSON_TYPE.equals(mediaType));
