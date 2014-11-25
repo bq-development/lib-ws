@@ -17,20 +17,28 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.bqreaders.silkroad.common.util.ConstraintViolationImplBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
-import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
 import io.dropwizard.validation.ConstraintViolations;
 import io.dropwizard.validation.Validated;
 
-public class EmptyEntitiesAllowedJacksonMessageBodyProvider extends JacksonMessageBodyProvider {
+public class EmptyEntitiesAllowedJacksonMessageBodyProvider extends JacksonJaxbJsonProvider {
 
-	private static final Class<?>[] DEFAULT_GROUP_ARRAY = new Class<?>[] { Default.class };
+	private static final Class<?>[] DEFAULT_GROUP_ARRAY = new Class[] { Default.class };
+	private final ObjectMapper mapper;
 	private final Validator validator;
 
 	public EmptyEntitiesAllowedJacksonMessageBodyProvider(ObjectMapper mapper, Validator validator) {
-		super(mapper, validator);
 		this.validator = validator;
+		this.mapper = mapper;
+		this.setMapper(mapper);
+	}
+
+	@Override
+	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+		return this.isProvidable(type) && super.isReadable(type, genericType, annotations, mediaType);
 	}
 
 	@Override
@@ -80,13 +88,35 @@ public class EmptyEntitiesAllowedJacksonMessageBodyProvider extends JacksonMessa
 	}
 
 	private Class<?>[] findValidationGroups(Annotation[] annotations) {
-		for (Annotation annotation : annotations) {
-			if (annotation.annotationType() == Valid.class) {
+		Annotation[] arr$ = annotations;
+		int len$ = annotations.length;
+
+		for(int i$ = 0; i$ < len$; ++i$) {
+			Annotation annotation = arr$[i$];
+			if(annotation.annotationType() == Valid.class) {
 				return DEFAULT_GROUP_ARRAY;
-			} else if (annotation.annotationType() == Validated.class) {
-				return ((Validated) annotation).value();
+			}
+
+			if(annotation.annotationType() == Validated.class) {
+				return ((Validated)annotation).value();
 			}
 		}
+
 		return null;
 	}
+
+	@Override
+	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+		return this.isProvidable(type) && super.isWriteable(type, genericType, annotations, mediaType);
+	}
+
+	private boolean isProvidable(Class<?> type) {
+		JsonIgnoreType ignore = (JsonIgnoreType)type.getAnnotation(JsonIgnoreType.class);
+		return ignore == null || !ignore.value();
+	}
+
+	public ObjectMapper getObjectMapper() {
+		return this.mapper;
+	}
+
 }
