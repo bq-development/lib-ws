@@ -16,6 +16,7 @@ import javax.validation.groups.Default;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.bqreaders.silkroad.common.util.ConstraintViolationImplBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
@@ -41,16 +42,20 @@ public class EmptyEntitiesAllowedJacksonMessageBodyProvider extends JacksonMessa
 
 	private Object validate(Annotation[] annotations, Object value) {
 		final Class<?>[] classes = findValidationGroups(annotations);
-
 		if (classes != null) {
 			Set<ConstraintViolation<Object>> violations;
-			if (value instanceof Map) {
+			if (value == null) {
+				violations = new HashSet<ConstraintViolation<Object>>() {
+					{
+						add(new ConstraintViolationImplBuilder().setMessageTemplate("request entity required").build());
+					}
+				};
+			} else if (value instanceof Map) {
 				violations = validate(((Map) value).values(), classes);
 			} else if (value instanceof Iterable) {
 				violations = validate((Iterable) value, classes);
 			} else if (value.getClass().isArray()) {
 				violations = new HashSet<>();
-
 				Object[] values = (Object[]) value;
 				for (Object item : values) {
 					violations.addAll(validator.validate(item, classes));
