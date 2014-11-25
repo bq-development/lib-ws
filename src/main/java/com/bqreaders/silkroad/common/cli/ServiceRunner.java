@@ -11,18 +11,6 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
 
-import com.bqreaders.silkroad.common.json.serialization.SilkroadJacksonMessageBodyProvider;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
-import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
-import io.dropwizard.logging.LoggingFactory;
-import io.dropwizard.server.ServerFactory;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.util.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -33,11 +21,24 @@ import com.bqreaders.silkroad.common.api.error.GenericExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.JsonValidationExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.NotFoundExceptionMapper;
 import com.bqreaders.silkroad.common.gson.GsonMessageReaderWriterProvider;
+import com.bqreaders.silkroad.common.json.serialization.EmptyEntitiesAllowedJacksonMessageBodyProvider;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.inject.InjectableProvider;
+
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
+import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
+import io.dropwizard.logging.LoggingFactory;
+import io.dropwizard.server.ServerFactory;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.util.Generics;
 
 /**
  * @author Alexander De Leon
@@ -59,10 +60,9 @@ public abstract class ServiceRunner<T> {
 		public void run(Configuration configuration, Environment environment) {
 			configureDefaultProviders(environment);
 			ApplicationContext applicationContext = loadSpringContext();
-			configureDropWizzard(configuration, applicationContext);
+			configureDropWizard(configuration, applicationContext);
 			configureFiltersAndInterceptors(environment, applicationContext);
 			configureService(environment, applicationContext);
-			environment.jersey().register(new SilkroadJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
 		}
 	};
 
@@ -99,36 +99,41 @@ public abstract class ServiceRunner<T> {
 
 	private void configureDefaultProviders(Environment environment) {
 		environment.jersey().register(new GsonMessageReaderWriterProvider());
+		environment.jersey().register(new EmptyEntitiesAllowedJacksonMessageBodyProvider(
+				environment.getObjectMapper(), environment.getValidator()));
 	}
 
-	private void configureDropWizzard(Configuration configuration, ApplicationContext applicationContext) {
+	private void configureDropWizard(Configuration configuration, ApplicationContext applicationContext) {
 		configuration.setServerFactory(applicationContext.getBean(ServerFactory.class));
 		configuration.setLoggingFactory(applicationContext.getBean(LoggingFactory.class));
 	}
 
 	private void configureFiltersAndInterceptors(Environment environment, ApplicationContext applicationContext) {
 		// Replace exception mappers with custom implementations
-		replaceExceptionMapper(environment, ConstraintViolationExceptionMapper.class, new JsonValidationExceptionMapper());
-		replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class, new JsonValidationExceptionMapper().new JacksonAdapter());
+		replaceExceptionMapper(environment, ConstraintViolationExceptionMapper.class,
+				new JsonValidationExceptionMapper());
+		replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class,
+				new JsonValidationExceptionMapper().new JacksonAdapter());
 		environment.jersey().register(NotFoundExceptionMapper.class);
 		environment.jersey().register(GenericExceptionMapper.class);
 
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
 
 		// Configure filters
-		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext
-				.getBeansOfType(ContainerRequestFilter.class).values());
+		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext.getBeansOfType(
+				ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
 
-		List<ContainerResponseFilter> responseFilters = new ArrayList<>(applicationContext
-				.getBeansOfType(ContainerResponseFilter.class).values());
+		List<ContainerResponseFilter> responseFilters = new ArrayList<>(applicationContext.getBeansOfType(
+				ContainerResponseFilter.class).values());
 		responseFilters.add(gzipFilter);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerResponseFilters", responseFilters);
 
 		Boolean etagEnabled = applicationContext.getEnvironment().getProperty("etag.enabled", Boolean.class);
 		if (etagEnabled == null || etagEnabled.equals(true)) {
-			environment.getApplicationContext().addFilter(ShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+			environment.getApplicationContext().addFilter(ShallowEtagHeaderFilter.class, "*",
+					EnumSet.of(DispatcherType.REQUEST));
 		}
 
 		// Configure injectable providers
