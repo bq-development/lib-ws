@@ -11,14 +11,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
-/**
- * @author Rubén Carrasco
- * 
- */
 public class PeriodJsonDeserializer extends JsonDeserializer<Period> {
 
 	@Override
-	public Period deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+	public Period deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 		return Period.parse(jp.getText());
 	}
 

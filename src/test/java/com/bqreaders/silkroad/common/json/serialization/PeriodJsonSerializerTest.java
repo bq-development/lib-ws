@@ -8,6 +8,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import java.io.IOException;
 import java.time.Period;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -18,33 +19,30 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * @author Alexander De Leon
  *
  */
-public class PeriodJsonDeserializerTest {
+public class PeriodJsonSerializerTest {
 
 	@Test
 	public void testNullPeriod() throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		TestBean bean = mapper.readValue("{\"period\":null}", TestBean.class);
-		assertThat(bean.period).isNull();
+		assertThat(bean.getPeriod()).isNull();
 	}
 
 	@Test
 	public void testMissingPeriod() throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		TestBean bean = mapper.readValue("{\"x\":\"x\"}", TestBean.class);
-		assertThat(bean.period).isNull();
+		assertThat(bean.getPeriod()).isNull();
 	}
 
 	@Test
 	public void testPeriod() throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		TestBean bean = mapper.readValue("{\"period\":\"P1y2m5d\"}", TestBean.class);
-		assertThat(bean.period.getYears()).isEqualTo(1);
-		assertThat(bean.period.getMonths()).isEqualTo(2);
-		assertThat(bean.period.getDays()).isEqualTo(5);
+		TestBean bean = mapper.readValue("{\"period\":\"P1Y2M5D\"}", TestBean.class);
+		assertThat(bean.getPeriod().toString()).isEqualTo("P1Y2M5D");
 	}
 
 	public static class TestBean {
-
 		private String x;
 
 		@JsonDeserialize(using = PeriodJsonDeserializer.class)
@@ -58,6 +56,7 @@ public class PeriodJsonDeserializerTest {
 			this.x = x;
 		}
 
+		@JsonSerialize(using = PeriodJsonSerializer.class)
 		public Period getPeriod() {
 			return period;
 		}
