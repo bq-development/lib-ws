@@ -5,9 +5,11 @@ package com.bqreaders.silkroad.common.gson;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.Collections;
 
 import javax.validation.ConstraintViolationException;
@@ -18,7 +20,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.sun.jersey.core.impl.provider.entity.StringProvider;
 import com.sun.jersey.core.provider.AbstractMessageReaderWriterProvider;
+import com.sun.jersey.spi.container.ContainerRequest;
 
 /**
  * Jax-rs {@link javax.ws.rs.ext.Provider} for Gson objects.
@@ -40,11 +44,12 @@ public class GsonMessageReaderWriterProvider extends AbstractMessageReaderWriter
 	public JsonElement readFrom(Class<JsonElement> type, Type genericType, Annotation[] annotations,
 			MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException {
-		if (entityStream == null || entityStream.available() == 0) {
+		if (entityStream == null) {
 			return null;
 		}
 		JsonParser parser = new JsonParser();
 		try {
+
 			JsonElement element = parser.parse(super.readFromAsString(entityStream, mediaType));
 			return element.isJsonNull() ? null : assertType(element, type);
 		} catch (JsonParseException e) {
