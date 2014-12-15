@@ -3,9 +3,8 @@
  */
 package com.bqreaders.silkroad.common.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,9 +12,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Resource to provide version information
@@ -42,7 +41,7 @@ public class VersionResource {
 	}
 
 	@GET
-	public Response getVersion() throws IOException {
+	public Response getVersion()  {
 		Properties data = getBuildMetadataProperties();
 		if (data == null) {
 			return Response.status(Status.NOT_FOUND).build();
@@ -51,20 +50,24 @@ public class VersionResource {
 
 	}
 
-	private Properties getBuildMetadataProperties() throws IOException {
+	private Properties getBuildMetadataProperties()  {
 		if (buildMetadataProperties == null) {
 			loadBuildMetadataProperties();
 		}
 		return buildMetadataProperties;
 	}
 
-	private void loadBuildMetadataProperties() throws IOException {
+	private void loadBuildMetadataProperties()  {
 		LOG.info("loading build metadata file {} from classpath", propertyFiles);
 		for (String propertyFile : propertyFiles) {
 			InputStream buildPropertiesStream = VersionResource.class.getResourceAsStream(propertyFile);
 			if (buildPropertiesStream != null) {
 				Properties prop = new Properties();
-				prop.load(buildPropertiesStream);
+				try {
+					prop.load(buildPropertiesStream);
+				} catch (IOException e) {
+					LOG.warn("Problem loading metadata file: "+propertyFile, e);
+				}
 				buildMetadataProperties = prop;
 				return;
 			}
