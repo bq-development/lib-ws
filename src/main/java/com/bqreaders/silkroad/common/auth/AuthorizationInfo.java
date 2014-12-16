@@ -3,11 +3,11 @@
  */
 package com.bqreaders.silkroad.common.auth;
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.bqreaders.lib.token.reader.TokenReader;
 import com.google.gson.JsonObject;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Alexander De Leon
@@ -30,6 +30,22 @@ public class AuthorizationInfo {
 
 	public Set<JsonObject> getAccessRules() {
 		return Collections.unmodifiableSet(accessRules);
+	}
+
+	public String getUserId() {
+		return getTokenReader().getInfo().getUserId();
+	}
+
+	public String getClientId() {
+		return getTokenReader().getInfo().getClientId();
+	}
+
+	public String getDomainId() {
+		return getTokenReader().getInfo().getDomainId();
+	}
+
+	public String getToken() {
+		return getTokenReader().getToken();
 	}
 
 }

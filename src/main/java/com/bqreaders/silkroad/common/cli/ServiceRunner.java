@@ -3,23 +3,10 @@
  */
 package com.bqreaders.silkroad.common.cli;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.DispatcherType;
-import javax.ws.rs.ext.ExceptionMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
-
 import com.bqreaders.silkroad.common.api.error.GenericExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.JsonValidationExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.NotFoundExceptionMapper;
+import com.bqreaders.silkroad.common.auth.AuthorizationInfoProvider;
 import com.bqreaders.silkroad.common.gson.GsonMessageReaderWriterProvider;
 import com.bqreaders.silkroad.common.json.serialization.EmptyEntitiesAllowedJacksonMessageBodyProvider;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,7 +16,6 @@ import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.inject.InjectableProvider;
-
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
@@ -39,6 +25,18 @@ import io.dropwizard.server.ServerFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.util.Generics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
+
+import javax.servlet.DispatcherType;
+import javax.ws.rs.ext.ExceptionMapper;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander De Leon
@@ -101,6 +99,7 @@ public abstract class ServiceRunner<T> {
 		environment.jersey().register(new GsonMessageReaderWriterProvider());
 		environment.jersey().register(new EmptyEntitiesAllowedJacksonMessageBodyProvider(
 				environment.getObjectMapper(), environment.getValidator()));
+		environment.jersey().register(new AuthorizationInfoProvider());
 	}
 
 	private void configureDropWizard(Configuration configuration, ApplicationContext applicationContext) {

@@ -3,21 +3,6 @@
  */
 package com.bqreaders.silkroad.common.auth;
 
-import static java.util.stream.StreamSupport.stream;
-
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.bqreaders.lib.token.TokenInfo;
 import com.bqreaders.silkroad.common.model.Error;
 import com.google.common.base.Predicate;
@@ -31,6 +16,19 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.auth.oauth.OAuthProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.lang.annotation.Annotation;
+import java.util.Set;
+
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the
@@ -44,17 +42,17 @@ import io.dropwizard.auth.oauth.OAuthProvider;
  */
 public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
+	public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
+
 	private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
 
 	private static final String UNAUTHORIZED = "unauthorized";
-
-	// Injected by Jersey
-	@Context
-	private HttpContext context;
-
 	private final OAuthProvider<AuthorizationInfo> oAuthProvider;
 	private final CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider;
 	private final String pathPattern;
+	// Injected by Jersey
+	@Context
+	private HttpContext context;
 
 	public AuthorizationRequestFilter(OAuthProvider<AuthorizationInfo> provider,
 			CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider, String pathPattern) {
@@ -78,6 +76,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 				}
 				// Check rules to verify access
 				checkAccessRules(info, request);
+				request.getProperties().put(AUTHORIZATION_INFO_PROPERTIES_KEY, info);
 			}
 		}
 		// If we have reach this point... then request is ok to proceed
