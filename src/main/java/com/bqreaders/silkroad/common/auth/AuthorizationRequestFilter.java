@@ -76,7 +76,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 				}
 				// Check rules to verify access
 				checkAccessRules(info, request);
-				request.getProperties().put(AUTHORIZATION_INFO_PROPERTIES_KEY, info);
+				storeAuthorizationInfoInRequestProperties(info, request);
 			}
 		}
 		// If we have reach this point... then request is ok to proceed
@@ -97,6 +97,10 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED)
 					.type(MediaType.APPLICATION_JSON_TYPE).entity(new Error(UNAUTHORIZED, UNAUTHORIZED)).build());
 		}
+	}
+
+	private void storeAuthorizationInfoInRequestProperties(AuthorizationInfo info, ContainerRequest request) {
+		request.getProperties().put(AUTHORIZATION_INFO_PROPERTIES_KEY, info);
 	}
 
 	private boolean matchesTokenType(TokenInfo token, JsonObject rule) {
