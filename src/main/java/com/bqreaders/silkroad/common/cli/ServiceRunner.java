@@ -3,6 +3,20 @@
  */
 package com.bqreaders.silkroad.common.cli;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.DispatcherType;
+import javax.ws.rs.ext.ExceptionMapper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
+
 import com.bqreaders.silkroad.common.api.error.GenericExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.JsonValidationExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.NotFoundExceptionMapper;
@@ -16,6 +30,7 @@ import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.inject.InjectableProvider;
+
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
@@ -25,18 +40,6 @@ import io.dropwizard.server.ServerFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.util.Generics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
-
-import javax.servlet.DispatcherType;
-import javax.ws.rs.ext.ExceptionMapper;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Alexander De Leon
@@ -46,12 +49,15 @@ public abstract class ServiceRunner<T> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceRunner.class);
 
-	private final Application<Configuration> application = new Application<Configuration>() {
+	class ServiceRunnerApplication extends Application<Configuration> {
+
+		private CliCommand cliCommand = new CliCommand("cli", "Command line shell.");
 
 		@Override
 		public void initialize(Bootstrap<Configuration> bootstrap) {
 			configureObjectMapper(bootstrap.getObjectMapper());
 			bootstrap(bootstrap);
+			bootstrap.addCommand(cliCommand);
 		}
 
 		@Override
@@ -62,12 +68,22 @@ public abstract class ServiceRunner<T> {
 			configureFiltersAndInterceptors(environment, applicationContext);
 			configureService(environment, applicationContext);
 		}
-	};
+
+		public void setCommandLine(CommandLineI commandLine) {
+			cliCommand.setCommandLine(commandLine);
+		}
+	}
+
+	private final ServiceRunnerApplication application = new ServiceRunnerApplication();
 
 	public final void run(String[] arguments) throws Exception {
 		LOG.info("Initializing ${conf.namespace} as {}", getName());
 		System.setProperty("conf.namespace", getName());
 		application.run(arguments);
+	}
+
+	public void setCommandLine(CommandLineI commandLine) {
+		application.setCommandLine(commandLine);
 	}
 
 	protected abstract String getName();
@@ -161,7 +177,7 @@ public abstract class ServiceRunner<T> {
 		environment.jersey().register(customExceptionMapper);
 	}
 
-	private final Class<T> getIocConfigurationClass() {
+	private Class<T> getIocConfigurationClass() {
 		return Generics.getTypeParameter(getClass(), Object.class);
 	}
 }
