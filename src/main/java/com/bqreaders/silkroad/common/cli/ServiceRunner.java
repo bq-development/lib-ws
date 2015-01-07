@@ -3,6 +3,16 @@
  */
 package com.bqreaders.silkroad.common.cli;
 
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
+import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
+import io.dropwizard.logging.LoggingFactory;
+import io.dropwizard.server.ServerFactory;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.util.Generics;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -20,6 +30,7 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import com.bqreaders.silkroad.common.api.error.GenericExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.JsonValidationExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.NotFoundExceptionMapper;
+import com.bqreaders.silkroad.common.api.error.URISyntaxExceptionMapper;
 import com.bqreaders.silkroad.common.auth.AuthorizationInfoProvider;
 import com.bqreaders.silkroad.common.gson.GsonMessageReaderWriterProvider;
 import com.bqreaders.silkroad.common.json.serialization.EmptyEntitiesAllowedJacksonMessageBodyProvider;
@@ -31,16 +42,6 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.inject.InjectableProvider;
 
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
-import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
-import io.dropwizard.logging.LoggingFactory;
-import io.dropwizard.server.ServerFactory;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.util.Generics;
-
 /**
  * @author Alexander De Leon
  * 
@@ -51,7 +52,7 @@ public abstract class ServiceRunner<T> {
 
 	class ServiceRunnerApplication extends Application<Configuration> {
 
-		private CliCommand cliCommand = new CliCommand("cli", "Command line shell.");
+		private final CliCommand cliCommand = new CliCommand("cli", "Command line shell.");
 
 		@Override
 		public void initialize(Bootstrap<Configuration> bootstrap) {
@@ -113,8 +114,9 @@ public abstract class ServiceRunner<T> {
 
 	private void configureDefaultProviders(Environment environment) {
 		environment.jersey().register(new GsonMessageReaderWriterProvider());
-		environment.jersey().register(new EmptyEntitiesAllowedJacksonMessageBodyProvider(
-				environment.getObjectMapper(), environment.getValidator()));
+		environment.jersey().register(
+				new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment
+						.getValidator()));
 		environment.jersey().register(new AuthorizationInfoProvider());
 	}
 
@@ -130,6 +132,7 @@ public abstract class ServiceRunner<T> {
 		replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class,
 				new JsonValidationExceptionMapper().new JacksonAdapter());
 		environment.jersey().register(NotFoundExceptionMapper.class);
+		environment.jersey().register(URISyntaxExceptionMapper.class);
 		environment.jersey().register(GenericExceptionMapper.class);
 
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
