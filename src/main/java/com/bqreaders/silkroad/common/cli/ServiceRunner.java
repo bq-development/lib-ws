@@ -3,6 +3,7 @@
  */
 package com.bqreaders.silkroad.common.cli;
 
+import com.bqreaders.silkroad.common.filter.OptionalContainerRequestFilter;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -49,32 +51,6 @@ import com.sun.jersey.spi.inject.InjectableProvider;
 public abstract class ServiceRunner<T> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceRunner.class);
-
-	class ServiceRunnerApplication extends Application<Configuration> {
-
-		private final CliCommand cliCommand = new CliCommand("cli", "Command line shell.");
-
-		@Override
-		public void initialize(Bootstrap<Configuration> bootstrap) {
-			configureObjectMapper(bootstrap.getObjectMapper());
-			bootstrap(bootstrap);
-			bootstrap.addCommand(cliCommand);
-		}
-
-		@Override
-		public void run(Configuration configuration, Environment environment) {
-			configureDefaultProviders(environment);
-			ApplicationContext applicationContext = loadSpringContext();
-			configureDropWizard(configuration, applicationContext);
-			configureFiltersAndInterceptors(environment, applicationContext);
-			configureService(environment, applicationContext);
-		}
-
-		public void setCommandLine(CommandLineI commandLine) {
-			cliCommand.setCommandLine(commandLine);
-		}
-	}
-
 	private final ServiceRunnerApplication application = new ServiceRunnerApplication();
 
 	public final void run(String[] arguments) throws Exception {
@@ -138,9 +114,14 @@ public abstract class ServiceRunner<T> {
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
 
 		// Configure filters
+		List<OptionalContainerRequestFilter> optionalRequestFilters = new ArrayList<>(applicationContext
+				.getBeansOfType(OptionalContainerRequestFilter.class).values()).stream()
+				.filter(filter -> filter.isEnabled()).collect(Collectors.toList());
+
 		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext.getBeansOfType(
 				ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
+		requestFilters.addAll(optionalRequestFilters);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
 
 		List<ContainerResponseFilter> responseFilters = new ArrayList<>(applicationContext.getBeansOfType(
@@ -182,5 +163,30 @@ public abstract class ServiceRunner<T> {
 
 	private Class<T> getIocConfigurationClass() {
 		return Generics.getTypeParameter(getClass(), Object.class);
+	}
+
+	class ServiceRunnerApplication extends Application<Configuration> {
+
+		private final CliCommand cliCommand = new CliCommand("cli", "Command line shell.");
+
+		@Override
+		public void initialize(Bootstrap<Configuration> bootstrap) {
+			configureObjectMapper(bootstrap.getObjectMapper());
+			bootstrap(bootstrap);
+			bootstrap.addCommand(cliCommand);
+		}
+
+		@Override
+		public void run(Configuration configuration, Environment environment) {
+			configureDefaultProviders(environment);
+			ApplicationContext applicationContext = loadSpringContext();
+			configureDropWizard(configuration, applicationContext);
+			configureFiltersAndInterceptors(environment, applicationContext);
+			configureService(environment, applicationContext);
+		}
+
+		public void setCommandLine(CommandLineI commandLine) {
+			cliCommand.setCommandLine(commandLine);
+		}
 	}
 }

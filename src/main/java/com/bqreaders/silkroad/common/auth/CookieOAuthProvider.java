@@ -1,15 +1,6 @@
 package com.bqreaders.silkroad.common.auth;
 
-import java.util.Map;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.bqreaders.silkroad.common.api.error.ErrorResponseFactory;
 import com.google.common.base.Optional;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.model.Parameter;
@@ -21,12 +12,43 @@ import com.sun.jersey.spi.inject.InjectableProvider;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
 /**
  * @author Rubén Carrasco
  *
  */
 public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Parameter> {
+
+	private final Authenticator<String, T> authenticator;
+
+	/**
+	 * Creates a new OAuthProvider with the given {@link Authenticator} and realm.
+	 *
+	 * @param authenticator
+	 *            the authenticator which will take the OAuth2 bearer token and convert them into instances of {@code T}
+	 * @param realm
+	 *            the name of the authentication realm
+	 */
+	public CookieOAuthProvider(Authenticator<String, T> authenticator) {
+		this.authenticator = authenticator;
+	}
+
+	@Override
+	public ComponentScope getScope() {
+		return ComponentScope.PerRequest;
+	}
+
+	@Override
+	public Injectable<?> getInjectable(ComponentContext ic, Auth a, Parameter c) {
+		return new CookieOAuthInjectable<T>(authenticator, a.required());
+	}
 
 	private static class CookieOAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
 		private static final Logger LOGGER = LoggerFactory.getLogger(CookieOAuthInjectable.class);
@@ -59,36 +81,10 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 			}
 
 			if (required) {
-				throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
-						.entity("Credentials are required to access this resource.").type(MediaType.TEXT_PLAIN_TYPE)
-						.build());
+				throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
 			}
 			return null;
 		}
-	}
-
-	private final Authenticator<String, T> authenticator;
-
-	/**
-	 * Creates a new OAuthProvider with the given {@link Authenticator} and realm.
-	 *
-	 * @param authenticator
-	 *            the authenticator which will take the OAuth2 bearer token and convert them into instances of {@code T}
-	 * @param realm
-	 *            the name of the authentication realm
-	 */
-	public CookieOAuthProvider(Authenticator<String, T> authenticator) {
-		this.authenticator = authenticator;
-	}
-
-	@Override
-	public ComponentScope getScope() {
-		return ComponentScope.PerRequest;
-	}
-
-	@Override
-	public Injectable<?> getInjectable(ComponentContext ic, Auth a, Parameter c) {
-		return new CookieOAuthInjectable<T>(authenticator, a.required());
 	}
 
 }

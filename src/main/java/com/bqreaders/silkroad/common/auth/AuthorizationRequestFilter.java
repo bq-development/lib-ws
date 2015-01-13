@@ -4,7 +4,7 @@
 package com.bqreaders.silkroad.common.auth;
 
 import com.bqreaders.lib.token.TokenInfo;
-import com.bqreaders.silkroad.common.model.Error;
+import com.bqreaders.silkroad.common.api.error.ErrorResponseFactory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -23,8 +23,6 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
@@ -46,7 +44,6 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
 
-	private static final String UNAUTHORIZED = "unauthorized";
 	private final OAuthProvider<AuthorizationInfo> oAuthProvider;
 	private final CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider;
 	private final String pathPattern;
@@ -94,8 +91,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
 		// if no rules apply then by default access is denied
 		if (applicableRules.isEmpty()) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED)
-					.type(MediaType.APPLICATION_JSON_TYPE).entity(new Error(UNAUTHORIZED, UNAUTHORIZED)).build());
+			throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
 		}
 	}
 
