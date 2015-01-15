@@ -23,7 +23,6 @@ public class HeadersQueryParamsFilter extends OptionalContainerRequestFilter {
 	public HeadersQueryParamsFilter(boolean enabled, ObjectMapper objectMapper) {
 		super(enabled);
 		this.objectMapper = objectMapper;
-
 	}
 
 	@Override

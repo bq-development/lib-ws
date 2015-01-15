@@ -67,7 +67,6 @@ public class HeadersQueryParamsFilterTest {
     @Test
     public void testFilterDisabled() {
         filter = new HeadersQueryParamsFilter(false, null);
-        queryParameters.add("headers", OBJ_2);
-        filter.filter(requestMock);
+        assertThat(filter.isEnabled()).isFalse();
     }
 }
