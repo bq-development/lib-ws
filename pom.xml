@@ -9,13 +9,13 @@
 
     <groupId>com.bqreaders.lib</groupId>
     <artifactId>ws-common</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>2.2.0</version>
     <name>ws-common</name>
 
     <scm>
         <connection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws-common</connection>
         <developerConnection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws-common</developerConnection>
-        <tag>HEAD</tag>
+        <tag>ws-common-2.2.0</tag>
     </scm>
 
     <properties>
