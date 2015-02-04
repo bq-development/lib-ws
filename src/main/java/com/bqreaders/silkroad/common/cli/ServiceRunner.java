@@ -3,17 +3,6 @@
  */
 package com.bqreaders.silkroad.common.cli;
 
-import com.bqreaders.silkroad.common.filter.OptionalContainerRequestFilter;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
-import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
-import io.dropwizard.logging.LoggingFactory;
-import io.dropwizard.server.ServerFactory;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.util.Generics;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -34,6 +23,8 @@ import com.bqreaders.silkroad.common.api.error.JsonValidationExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.NotFoundExceptionMapper;
 import com.bqreaders.silkroad.common.api.error.URISyntaxExceptionMapper;
 import com.bqreaders.silkroad.common.auth.AuthorizationInfoProvider;
+import com.bqreaders.silkroad.common.filter.OptionalContainerRequestFilter;
+import com.bqreaders.silkroad.common.filter.OptionalContainerResponseFilter;
 import com.bqreaders.silkroad.common.gson.GsonMessageReaderWriterProvider;
 import com.bqreaders.silkroad.common.json.serialization.EmptyEntitiesAllowedJacksonMessageBodyProvider;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -43,6 +34,16 @@ import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.inject.InjectableProvider;
+
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
+import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
+import io.dropwizard.logging.LoggingFactory;
+import io.dropwizard.server.ServerFactory;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.util.Generics;
 
 /**
  * @author Alexander De Leon
@@ -114,19 +115,24 @@ public abstract class ServiceRunner<T> {
 		GZIPContentEncodingFilter gzipFilter = new GZIPContentEncodingFilter();
 
 		// Configure filters
-		List<OptionalContainerRequestFilter> optionalRequestFilters = new ArrayList<>(applicationContext
+		List<OptionalContainerRequestFilter> disabledRequestFilters = new ArrayList<>(applicationContext
 				.getBeansOfType(OptionalContainerRequestFilter.class).values()).stream()
-				.filter(filter -> filter.isEnabled()).collect(Collectors.toList());
+				.filter(filter -> !filter.isEnabled()).collect(Collectors.toList());
 
 		List<ContainerRequestFilter> requestFilters = new ArrayList<>(applicationContext.getBeansOfType(
 				ContainerRequestFilter.class).values());
 		requestFilters.add(gzipFilter);
-		requestFilters.addAll(optionalRequestFilters);
+		requestFilters.removeAll(disabledRequestFilters);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerRequestFilters", requestFilters);
+
+		List<OptionalContainerResponseFilter> disabledResponseFilters = new ArrayList<>(applicationContext
+				.getBeansOfType(OptionalContainerResponseFilter.class).values()).stream()
+				.filter(filter -> !filter.isEnabled()).collect(Collectors.toList());
 
 		List<ContainerResponseFilter> responseFilters = new ArrayList<>(applicationContext.getBeansOfType(
 				ContainerResponseFilter.class).values());
 		responseFilters.add(gzipFilter);
+		responseFilters.removeAll(disabledResponseFilters);
 		environment.jersey().property("com.sun.jersey.spi.container.ContainerResponseFilters", responseFilters);
 
 		Boolean etagEnabled = applicationContext.getEnvironment().getProperty("etag.enabled", Boolean.class);

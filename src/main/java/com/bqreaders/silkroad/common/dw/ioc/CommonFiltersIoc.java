@@ -1,17 +1,15 @@
 package com.bqreaders.silkroad.common.dw.ioc;
 
-import com.bqreaders.silkroad.common.filter.CharsetResponseFilter;
-import com.bqreaders.silkroad.common.filter.HeadersQueryParamsFilter;
-import com.bqreaders.silkroad.common.filter.NoRedirectResponseFilter;
-import com.bqreaders.silkroad.common.filter.QueryParamsNotAllowedFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import java.util.Collections;
-import java.util.List;
+import com.bqreaders.silkroad.common.filter.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Created by Alberto J. Rubio
@@ -19,20 +17,24 @@ import java.util.List;
 @Configuration
 public class CommonFiltersIoc {
 
-    @Autowired
-    private Environment env;
+	@Autowired
+	private Environment env;
 
-    @Bean
-    public CharsetResponseFilter getCharsetResponseFilter() {
-        return new CharsetResponseFilter(
-                env.getProperty("filter.charset.enabled", Boolean.class, true));
-    }
+	@Bean
+	public CharsetResponseFilter getCharsetResponseFilter() {
+		return new CharsetResponseFilter(env.getProperty("filter.charset.enabled", Boolean.class, true));
+	}
 
-    @Bean
-    public NoRedirectResponseFilter getRedirectResponseFilter() {
-        return new NoRedirectResponseFilter(
-                env.getProperty("filter.noRedirect.enabled", Boolean.class, true));
-    }
+	@Bean
+	public NoRedirectResponseFilter getRedirectResponseFilter() {
+		return new NoRedirectResponseFilter(env.getProperty("filter.noRedirect.enabled", Boolean.class, true));
+	}
+
+	@Bean
+	public ProxyLocationResponseRewriteFilter getProxyLocationResponseRewriteFilter() {
+		return new ProxyLocationResponseRewriteFilter(env.getProperty("filter.proxyLocationResponseRewrite.enabled",
+				Boolean.class, true));
+	}
 
 	@Bean
 	public HeadersQueryParamsFilter getHeadersQueryParmamsFilter(ObjectMapper objectMapper) {
