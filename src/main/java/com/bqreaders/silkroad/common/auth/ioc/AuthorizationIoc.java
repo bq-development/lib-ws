@@ -142,9 +142,9 @@ public class AuthorizationIoc {
 	@Bean
 	public ContainerRequestFilter getAuthorizationRequestFilter(OAuthProvider<AuthorizationInfo> oauthProvider,
 			CookieOAuthProvider<AuthorizationInfo> cookieOauthProvider, @Value("${auth.enabled}") boolean authEnabled,
-			@Value("${auth.securePath}") String securePath) {
+			@Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath) {
 		if (authEnabled) {
-			return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, securePath);
+			return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, unAuthenticatedPath);
 		} else {
 			LOG.warn("Authorization validation is disabled. The systen is in a INSECURE mode");
 			return emptyFilter();

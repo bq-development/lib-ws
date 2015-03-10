@@ -40,6 +40,7 @@ public class AuthorizationRequestFilterTest {
 	private static final String TEST_PATH = "/test";
 
 	private static final String TEST_USER = "user";
+	private static final String TEST_NOT_SECURIZED_PATH = "/not_securize_path";
 
 	private OAuthProvider<AuthorizationInfo> providerMock;
 	private CookieOAuthProvider<AuthorizationInfo> cookieProviderMock;
@@ -64,15 +65,15 @@ public class AuthorizationRequestFilterTest {
 
 	@Test(expected = WebApplicationException.class)
 	public void testPatternMatches() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock,
+				TEST_NOT_SECURIZED_PATH);
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		filter.filter(requestMock);
 	}
 
 	@Test
 	public void testPatternNoMatches() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock,
-				"/nomach/.*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, TEST_PATH);
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		assertThat(filter.filter(requestMock)).isSameAs(requestMock);
 	}
@@ -113,7 +114,8 @@ public class AuthorizationRequestFilterTest {
 
 	@Test(expected = WebApplicationException.class)
 	public void testNoRules() {
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock,
+				TEST_NOT_SECURIZED_PATH);
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
 		stubRules(); // no rules
@@ -143,7 +145,8 @@ public class AuthorizationRequestFilterTest {
 		when(tokenReader.getInfo()).thenReturn(tokenMock);
 		when(tokenMock.getUserId()).thenReturn(null);
 		when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock, ".*");
+		AuthorizationRequestFilter filter = new AuthorizationRequestFilter(providerMock, cookieProviderMock,
+				TEST_NOT_SECURIZED_PATH);
 		when(requestMock.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
 		stubRequest(TEST_PATH, HttpMethod.GET);
 		stubRules(jsonParser.parse(

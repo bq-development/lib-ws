@@ -29,11 +29,10 @@ import java.util.Set;
 import static java.util.stream.StreamSupport.stream;
 
 /**
- * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the
- * {@link io.dropwizard.auth.oauth.OAuthProvider} class to obtain an instance of
- * {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo}. The filter is configured to only verify the set of
- * request whose path matches the specified pattern. It validates only access rules of type <b>http_access</b>. If
- * request cannot proceed, it returns a HTTP error 401 without any error information.
+ * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the {@link io.dropwizard.auth.oauth.OAuthProvider}
+ * class to obtain an instance of {@link com.bqreaders.silkroad.common.auth.AuthorizationInfo}. The filter is configured
+ * to only verify the set of request whose path matches the specified pattern. It validates only access rules of type
+ * <b>http_access</b>. If request cannot proceed, it returns a HTTP error 401 without any error information.
  * 
  * @author Alexander De Leon
  * 
@@ -46,22 +45,22 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
 	private final OAuthProvider<AuthorizationInfo> oAuthProvider;
 	private final CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider;
-	private final String pathPattern;
+	private final String unAuthenticatedPathPattern;
 	// Injected by Jersey
 	@Context
 	private HttpContext context;
 
 	public AuthorizationRequestFilter(OAuthProvider<AuthorizationInfo> provider,
-			CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider, String pathPattern) {
+			CookieOAuthProvider<AuthorizationInfo> cookieOAuthProvider, String unAuthenticatedPathPattern) {
 		this.oAuthProvider = provider;
 		this.cookieOAuthProvider = cookieOAuthProvider;
-		this.pathPattern = pathPattern;
+		this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public ContainerRequest filter(ContainerRequest request) {
-		if (request.getPath().matches(pathPattern)) {
+		if (!request.getPath().matches(unAuthenticatedPathPattern)) {
 			// OPTIONS is always allowed (for CORS)
 			if (!request.getMethod().equals(HttpMethod.OPTIONS)) {
 				// Obtain the authorization information from the bearer token.
