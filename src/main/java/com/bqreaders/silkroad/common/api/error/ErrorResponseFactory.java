@@ -63,6 +63,10 @@ public class ErrorResponseFactory {
 		return conflict(DEFAULT_CONFLICT_ERROR);
 	}
 
+    public Response conflict(String message) {
+        return conflict(new Error("conflict", message));
+    }
+
 	public Response invalidEntity(String description) {
 		return invalidEntity(new Error("invalid_entity", ErrorMessage.INVALID_ENTITY.getMessage(description)));
 	}
