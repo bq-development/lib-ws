@@ -68,16 +68,8 @@ public abstract class ServiceRunner<T> {
 
 	protected abstract void configureService(Environment environment, ApplicationContext context);
 
-	/**
-	 * Override by subclasses to add bootstrap logic
-	 */
-	protected void bootstrap(Bootstrap<Configuration> bootstrap) {
-		// empty
-	}
+	protected void bootstrap(Bootstrap<Configuration> bootstrap) {}
 
-	/**
-	 * Override by subclasses to configure {@link com.fasterxml.jackson.databind.ObjectMapper}
-	 */
 	protected void configureObjectMapper(ObjectMapper objectMapperFactory) {
 		objectMapperFactory.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		objectMapperFactory.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

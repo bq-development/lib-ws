@@ -35,6 +35,7 @@ public final class LogbackUtils {
 	 * @param logLevel
 	 *            One of the supported log levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF. {@code null} value is
 	 *            considered as 'OFF'.
+	 * @return Log level setted
 	 */
 	public static boolean setLogLevel(String loggerName, String logLevel) {
 		String logLevelUpper = (logLevel == null) ? "OFF" : logLevel.toUpperCase();

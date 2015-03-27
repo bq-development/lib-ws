@@ -18,9 +18,9 @@ import com.sun.jersey.spi.container.ContainerResponseFilter;
 
 /**
  * This filter permits different configurations for the CORS behaviour.
- * 
- * @see http://www.w3.org/TR/cors/
- * 
+ *
+ * @see <a href="http://www.w3.org/TR/cors/">http://www.w3.org/TR/cors/</a>
+ *
  * @author Alexander De Leon
  * 
  */

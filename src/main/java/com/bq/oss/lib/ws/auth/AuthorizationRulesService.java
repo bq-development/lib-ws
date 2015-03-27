@@ -13,9 +13,6 @@ import java.util.Set;
  */
 public interface AuthorizationRulesService {
 
-	/**
-	 * Simple interface to obtain the set of authorization rules for a token and a audience
-	 */
 	Set<JsonObject> getAuthorizationRules(String token, String audience);
 
 }

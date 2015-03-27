@@ -33,8 +33,6 @@ public class CookieOAuthProvider<T> implements InjectableProvider<Auth, Paramete
 	 *
 	 * @param authenticator
 	 *            the authenticator which will take the OAuth2 bearer token and convert them into instances of {@code T}
-	 * @param realm
-	 *            the name of the authentication realm
 	 */
 	public CookieOAuthProvider(Authenticator<String, T> authenticator) {
 		this.authenticator = authenticator;
