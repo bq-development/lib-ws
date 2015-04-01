@@ -3,8 +3,6 @@
  */
 package com.bq.oss.lib.ws.auth.ioc;
 
-import com.bq.oss.lib.token.ioc.TokenIoc;
-import com.bq.oss.lib.token.parser.TokenParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,18 +15,16 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import redis.clients.jedis.JedisPoolConfig;
 
-import com.bq.oss.lib.ws.auth.AuthorizationInfo;
-import com.bq.oss.lib.ws.auth.AuthorizationRequestFilter;
-import com.bq.oss.lib.ws.auth.AuthorizationRulesService;
-import com.bq.oss.lib.ws.auth.BearerTokenAuthenticator;
-import com.bq.oss.lib.ws.auth.CookieOAuthProvider;
-import com.bq.oss.lib.ws.auth.DefaultAuthorizationRulesService;
+import com.bq.oss.lib.token.ioc.TokenIoc;
+import com.bq.oss.lib.token.parser.TokenParser;
+import com.bq.oss.lib.ws.auth.*;
 import com.bq.oss.lib.ws.auth.repository.AuthorizationRulesRepository;
 import com.bq.oss.lib.ws.auth.repository.RedisAuthorizationRulesRepository;
 import com.bq.oss.lib.ws.health.AuthorizationRedisHealthCheck;
 import com.bq.oss.lib.ws.redis.GsonRedisSerializer;
 import com.google.gson.JsonObject;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
+
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.oauth.OAuthProvider;
 
