@@ -10,10 +10,10 @@ import static org.mockito.Mockito.when;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.bq.oss.lib.ws.model.CustomHeaders;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bq.oss.lib.ws.model.CustomHeaders;
 import com.sun.jersey.core.header.OutBoundHeaders;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
@@ -77,12 +77,12 @@ public class CorsResponseFilterTest {
 		assertThat(responseHeaders.getFirst("Access-Control-Allow-Origin")).isEqualTo(TEST_ORIGIN);
 		assertThat(responseHeaders.getFirst("Access-Control-Max-Age")).isEqualTo(TEST_PREFLIGHT_MAX_AGE);
 		assertThat(responseHeaders.getFirst("Access-Control-Allow-Methods")).isEqualTo("GET");
-		assertThat(responseHeaders.getFirst("Access-Control-Expose-Headers")).isEqualTo("Location");
+		assertThat(responseHeaders.getFirst("Access-Control-Expose-Headers")).isEqualTo("Location,Date");
 		String[] allowedHeaders = ((String) responseHeaders.getFirst("Access-Control-Allow-Headers")).split(",");
-        assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
-        assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
-        assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
-        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
+		assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
+		assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
+		assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
+		assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
 	}
 
 	@Test
@@ -106,11 +106,11 @@ public class CorsResponseFilterTest {
 		assertThat(responseHeaders.getFirst("Access-Control-Allow-Origin")).isEqualTo(TEST_ORIGIN + " " + TEST_ORIGIN2);
 		assertThat(responseHeaders.getFirst("Access-Control-Max-Age")).isEqualTo(TEST_PREFLIGHT_MAX_AGE);
 		assertThat(responseHeaders.getFirst("Access-Control-Allow-Methods")).isEqualTo("GET");
-		assertThat(responseHeaders.getFirst("Access-Control-Expose-Headers")).isEqualTo("Location");
+		assertThat(responseHeaders.getFirst("Access-Control-Expose-Headers")).isEqualTo("Location,Date");
 		String[] allowedHeaders = ((String) responseHeaders.getFirst("Access-Control-Allow-Headers")).split(",");
 		assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
 		assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
 		assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
-        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
+		assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
 	}
 }
