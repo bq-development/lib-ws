@@ -34,7 +34,7 @@
     <scm>
         <connection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws</connection>
         <developerConnection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws</developerConnection>
-        <url>https://github.com/bq/lib-rabbitmq</url>
+        <url>https://github.com/bq/lib-ws</url>
         <tag>HEAD</tag>
     </scm>
 
