@@ -15,7 +15,12 @@ public enum ErrorMessage {
 	INVALID_ENTITY("Unprocessable entity: {0}"),
 	UNAUTHORIZE("Unauthorized"),
 	FORBIDDEN("Forbidden"),
-	PRECONDITION_FAILED("Precondition failed: {0}");
+	PRECONDITION_FAILED("Precondition failed: {0}"),
+    INVALID_PAGE("Invalid api:page param : {0}, must be a natural number."),
+    INVALID_PAGE_SIZE("Invalid api:pageSize param : {0}, must be an integer in (0,{1}]"),
+    INVALID_SORT("Invalid api:sort param: {0}, {1}"),
+    INVALID_QUERY("Invalid api:query param: {0}, {1}"),
+    INVALID_AGGREGATION("Invalid api:aggregation param: {0}, {1}");
 
 	private final String pattern;
 
