@@ -23,7 +23,7 @@ import java.lang.Integer;
  */
 
 @Configuration
-public class ApiCommonIoc {
+public class QueriesIoc {
 
 	@Autowired
 	private Environment env;
