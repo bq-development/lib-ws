@@ -9,6 +9,7 @@ import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.bq.oss.lib.queries.jaxrs.QueryParameters;
 import com.bq.oss.lib.queries.builder.ResourceQueryBuilder;
 import com.bq.oss.lib.queries.parser.CustomJsonParser;
 import com.bq.oss.lib.queries.parser.JacksonAggregationParser;
