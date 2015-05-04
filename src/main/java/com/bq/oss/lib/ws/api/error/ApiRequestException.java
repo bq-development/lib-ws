@@ -8,7 +8,7 @@ public class ApiRequestException extends RuntimeException {
 
 	private final com.bq.oss.lib.ws.model.Error error;
 
-	public ApiRequestException(String error, String errorDescription, Exception e) {
+	public ApiRequestException(String error, String errorDescription, Throwable e) {
 		super(errorDescription, e);
 		this.error = new Error(error, errorDescription);
 	}

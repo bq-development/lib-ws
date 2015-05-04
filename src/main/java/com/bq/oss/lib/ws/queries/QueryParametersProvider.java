@@ -3,7 +3,6 @@ package com.bq.oss.lib.ws.queries;
 
 import java.lang.Exception;
 import java.lang.Integer;
-import java.lang.NumberFormatException;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Optional;
@@ -14,10 +13,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import com.bq.oss.lib.queries.jaxrs.QueryParameters;
+import com.bq.oss.lib.queries.exception.InvalidParameterException;
 import com.bq.oss.lib.queries.parser.AggregationParser;
 import com.bq.oss.lib.queries.parser.QueryParser;
 import com.bq.oss.lib.ws.annotation.Rest;
-import com.bq.oss.lib.ws.api.error.ApiRequestException;
+import com.bq.oss.lib.ws.api.error.ErrorMessage;
+import com.bq.oss.lib.ws.api.error.ErrorResponseFactory;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.core.spi.component.ComponentContext;
@@ -79,13 +81,35 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
 							getIntegerParam(params, API_PAGE).orElse(0), maxPageSize, getStringParam(params, API_SORT),
 							getStringParam(params, API_QUERY), queryParser, getStringParam(params, API_AGGREGATION),
 							aggregationParser, getStringParam(params, API_SEARCH));
-				} catch (NumberFormatException e) {
-					throw new WebApplicationException(badRequestResponse(error(e)));
-				} catch (ApiRequestException e) {
-					throw new WebApplicationException(
-							badRequestResponse(e.getError() != null ? e.getError() : error(e)));
-				}
+                }
+                catch (InvalidParameterException e) {
+                    throw toRequestException(e);
+                }
+                catch (IllegalArgumentException e) {
+                    throw new WebApplicationException(badRequestResponse(error(e)));
+                }
 			}
+
+            private WebApplicationException toRequestException(InvalidParameterException e){
+                switch(e.getParameter()){
+                    case AGGREGATION:
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_aggregation",
+                                ErrorMessage.INVALID_AGGREGATION.getMessage(e.getValue(), e.getMessage()))));
+                    case PAGE:
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_page", ErrorMessage.INVALID_PAGE.getMessage(e.getValue()))));
+                    case PAGE_SIZE:
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_page_size", ErrorMessage.INVALID_PAGE_SIZE.getMessage(
+                                e.getValue(), maxPageSize))));
+                    case QUERY:
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_query", ErrorMessage.INVALID_QUERY.getMessage(e.getValue(),
+                                e.getMessage()))));
+                    case SORT:
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_sort", ErrorMessage.INVALID_SORT.getMessage(e.getValue(),
+                                e.getMessage()))));
+                    default:
+                        return new WebApplicationException(ErrorResponseFactory.getInstance().badRequest());
+                }
+            }
 
 			private Error error(Exception e) {
 				return new Error("bad_request", e.getMessage());
