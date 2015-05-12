@@ -14,6 +14,7 @@ import com.bq.oss.lib.queries.builder.ResourceQueryBuilder;
 import com.bq.oss.lib.queries.parser.CustomJsonParser;
 import com.bq.oss.lib.queries.parser.JacksonAggregationParser;
 import com.bq.oss.lib.queries.parser.JacksonQueryParser;
+import com.bq.oss.lib.queries.parser.JacksonSortParser;
 import com.bq.oss.lib.queries.request.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,10 +41,13 @@ public class QueryParametersProviderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE,
-				new JacksonQueryParser(new CustomJsonParser(new ObjectMapper().getFactory())),
-				new JacksonAggregationParser(new CustomJsonParser(new ObjectMapper().getFactory())));
-		Parameter parameter = new Parameter(null, null, null, null, null, QueryParameters.class);
+        CustomJsonParser parser = new CustomJsonParser(new ObjectMapper().getFactory());
+        QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE,
+                new JacksonQueryParser(parser),
+                new JacksonAggregationParser(parser),
+                new JacksonSortParser(parser)
+        );
+        Parameter parameter = new Parameter(null, null, null, null, null, QueryParameters.class);
 		injectable = (AbstractHttpContextInjectable<QueryParameters>) provider.getInjectable(null, null, parameter);
 		context = mock(HttpContext.class);
 	}

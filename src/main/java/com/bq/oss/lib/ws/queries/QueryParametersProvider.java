@@ -5,6 +5,7 @@ import java.lang.Exception;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
@@ -17,6 +18,7 @@ import com.bq.oss.lib.queries.jaxrs.QueryParameters;
 import com.bq.oss.lib.queries.exception.InvalidParameterException;
 import com.bq.oss.lib.queries.parser.AggregationParser;
 import com.bq.oss.lib.queries.parser.QueryParser;
+import com.bq.oss.lib.queries.parser.SortParser;
 import com.bq.oss.lib.ws.annotation.Rest;
 import com.bq.oss.lib.ws.api.error.ErrorMessage;
 import com.bq.oss.lib.ws.api.error.ErrorResponseFactory;
@@ -47,19 +49,22 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
 	private final int maxPageSize;
 	private final QueryParser queryParser;
 	private final AggregationParser aggregationParser;
+    private final SortParser sortParser;
 
-	public QueryParametersProvider(int defaultPageSize, int maxPageSize, QueryParser queryParser,
-			AggregationParser aggregationParser) {
-		super();
+    public QueryParametersProvider(int defaultPageSize, int maxPageSize, QueryParser queryParser,
+                                   AggregationParser aggregationParser, SortParser sortParser) {
+        super();
 		this.defaultPageSize = defaultPageSize;
 		this.maxPageSize = maxPageSize;
 		this.queryParser = queryParser;
 		this.aggregationParser = aggregationParser;
+        this.sortParser = sortParser;
 
 	}
 
-	@Override
-	public ComponentScope getScope() {
+
+    @Override
+    public ComponentScope getScope() {
 		return ComponentScope.PerRequest;
 	}
 
@@ -79,8 +84,8 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
 				try {
 					return new QueryParameters(getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize),
 							getIntegerParam(params, API_PAGE).orElse(0), maxPageSize, getStringParam(params, API_SORT),
-							getStringParam(params, API_QUERY), queryParser, getStringParam(params, API_AGGREGATION),
-							aggregationParser, getStringParam(params, API_SEARCH));
+                            getListStringParam(params, API_QUERY), queryParser, getStringParam(params, API_AGGREGATION),
+                            aggregationParser, sortParser, getStringParam(params, API_SEARCH));
                 }
                 catch (InvalidParameterException e) {
                     throw toRequestException(e);
@@ -127,6 +132,11 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
 			private Optional<String> getStringParam(MultivaluedMap<String, String> params, String key) {
 				return params.containsKey(key) ? Optional.of(params.get(key).get(0)) : Optional.empty();
 			}
-		};
+
+            private Optional<List<String>> getListStringParam(MultivaluedMap<String, String> params, String key) {
+                return params.containsKey(key) ? Optional.of(params.get(key)) : Optional.empty();
+
+            }
+        };
 	}
 }

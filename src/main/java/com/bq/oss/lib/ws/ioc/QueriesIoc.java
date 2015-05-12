@@ -1,10 +1,6 @@
 package com.bq.oss.lib.ws.ioc;
 
-import com.bq.oss.lib.queries.parser.AggregationParser;
-import com.bq.oss.lib.queries.parser.CustomJsonParser;
-import com.bq.oss.lib.queries.parser.JacksonAggregationParser;
-import com.bq.oss.lib.queries.parser.JacksonQueryParser;
-import com.bq.oss.lib.queries.parser.QueryParser;
+import com.bq.oss.lib.queries.parser.*;
 import com.bq.oss.lib.ws.api.provider.RemoteAddressProvider;
 import com.bq.oss.lib.ws.queries.QueryParametersProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +27,7 @@ public class QueriesIoc {
 	@Bean
 	public QueryParametersProvider getSearchParametersProvider() {
 		return new QueryParametersProvider(Integer.valueOf(env.getProperty("api.defaultPageSize")), Integer.valueOf(env
-				.getProperty("api.maxPageSize")), getQueryParser(), getAggregationParser());
+                .getProperty("api.maxPageSize")), getQueryParser(), getAggregationParser(), getSortParser());
 	}
 
 	@Bean
@@ -53,6 +49,11 @@ public class QueriesIoc {
 	public QueryParser getQueryParser() {
 		return new JacksonQueryParser(getCustomJsonParser());
 	}
+
+    @Bean
+    public SortParser getSortParser() {
+        return new JacksonSortParser(getCustomJsonParser());
+    }
 
 	@Bean
 	public ObjectMapper getObjectMapper() {
