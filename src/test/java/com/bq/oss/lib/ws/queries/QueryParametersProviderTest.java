@@ -9,15 +9,13 @@ import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
+import com.bq.oss.lib.queries.parser.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bq.oss.lib.queries.builder.ResourceQueryBuilder;
 import com.bq.oss.lib.queries.jaxrs.QueryParameters;
-import com.bq.oss.lib.queries.parser.CustomJsonParser;
-import com.bq.oss.lib.queries.parser.JacksonAggregationParser;
-import com.bq.oss.lib.queries.parser.JacksonQueryParser;
-import com.bq.oss.lib.queries.parser.JacksonSortParser;
 import com.bq.oss.lib.queries.request.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.core.ExtendedUriInfo;
@@ -41,11 +39,11 @@ public class QueryParametersProviderTest {
     @Before
     public void setUp() throws Exception {
         CustomJsonParser parser = new CustomJsonParser(new ObjectMapper().getFactory());
-        QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE,
-                new JacksonQueryParser(parser),
-                new JacksonAggregationParser(parser),
-                new JacksonSortParser(parser)
-        );
+
+        QueryParametersBuilder queryParametersBuilder = new QueryParametersBuilder(new JacksonQueryParser(parser), new JacksonAggregationParser(parser), new JacksonSortParser(parser), new DefaultPaginationParser());
+
+        QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, queryParametersBuilder);
+
         Parameter parameter = new Parameter(null, null, null, null, null, QueryParameters.class);
         injectable = (AbstractHttpContextInjectable<QueryParameters>) provider.getInjectable(null, null, parameter);
         context = mock(HttpContext.class);

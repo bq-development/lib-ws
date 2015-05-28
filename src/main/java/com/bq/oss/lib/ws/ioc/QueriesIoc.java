@@ -1,5 +1,6 @@
 package com.bq.oss.lib.ws.ioc;
 
+import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,12 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
     @Bean
     public QueryParametersProvider getSearchParametersProvider() {
         return new QueryParametersProvider(Integer.valueOf(env.getProperty("api.defaultPageSize")), Integer.valueOf(env
-                .getProperty("api.maxPageSize")), getQueryParser(), getAggregationParser(), getSortParser());
+                .getProperty("api.maxPageSize")), getQueryParametersBuilder());
+    }
+
+    @Bean
+    public QueryParametersBuilder getQueryParametersBuilder() {
+        return new QueryParametersBuilder(getQueryParser(), getAggregationParser(), getSortParser(), getPaginationParser());
     }
 
     @Bean
@@ -50,6 +56,11 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
     @Bean
     public SortParser getSortParser() {
         return new JacksonSortParser(getCustomJsonParser());
+    }
+
+    @Bean
+    public PaginationParser getPaginationParser() {
+        return new DefaultPaginationParser();
     }
 
     @Bean
