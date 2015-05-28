@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
 import com.bq.oss.lib.queries.exception.InvalidParameterException;
 import com.bq.oss.lib.queries.jaxrs.QueryParameters;
 import com.bq.oss.lib.queries.parser.AggregationParser;
@@ -37,26 +38,19 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
     public static final String API_PAGE = "api:page";
     public static final String API_SORT = "api:sort";
     public static final String API_QUERY = "api:query";
+    public static final String API_CONDITION = "api:condition";
     public static final String API_SEARCH = "api:search";
     public static final String API_AGGREGATION = "api:aggregation";
 
     private final int defaultPageSize;
     private final int maxPageSize;
-    private final QueryParser queryParser;
-    private final AggregationParser aggregationParser;
-    private final SortParser sortParser;
+    private final QueryParametersBuilder queryParametersBuilder;
 
-    public QueryParametersProvider(int defaultPageSize, int maxPageSize, QueryParser queryParser,
-                                   AggregationParser aggregationParser, SortParser sortParser) {
-        super();
+    public QueryParametersProvider(int defaultPageSize, int maxPageSize, QueryParametersBuilder queryParametersBuilder) {
         this.defaultPageSize = defaultPageSize;
         this.maxPageSize = maxPageSize;
-        this.queryParser = queryParser;
-        this.aggregationParser = aggregationParser;
-        this.sortParser = sortParser;
-
+        this.queryParametersBuilder = queryParametersBuilder;
     }
-
 
     @Override
     public ComponentScope getScope() {
@@ -77,10 +71,13 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
                 MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
 
                 try {
-                    return new QueryParameters(getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize),
-                            getIntegerParam(params, API_PAGE).orElse(0), maxPageSize, getStringParam(params, API_SORT),
-                            getListStringParam(params, API_QUERY), queryParser, getStringParam(params, API_AGGREGATION),
-                            aggregationParser, sortParser, getStringParam(params, API_SEARCH));
+                    return queryParametersBuilder.createQueryParameters(
+                            getIntegerParam(params, API_PAGE).orElse(0),
+                            getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize),
+                            maxPageSize, getStringParam(params, API_SORT),
+                            getListStringParam(params, API_QUERY), getListStringParam(params, API_CONDITION), getStringParam(params, API_AGGREGATION),
+                            getStringParam(params, API_SEARCH)
+                    );
                 } catch (InvalidParameterException e) {
                     throw toRequestException(e);
                 } catch (IllegalArgumentException e) {
