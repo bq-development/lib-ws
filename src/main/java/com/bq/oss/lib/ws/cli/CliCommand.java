@@ -28,6 +28,7 @@ public class CliCommand extends Command {
     @Override
     @SuppressWarnings("unchecked")
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
+        System.setProperty("mode", "console");
         List<String> commandLineFiles = Optional.ofNullable(namespace.get("files"))
             .map(o -> (List<Object>) o)
             .filter(filesObject -> !filesObject.isEmpty())
