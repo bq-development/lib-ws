@@ -1,12 +1,22 @@
 package com.bq.oss.lib.ws.ioc;
 
-import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import com.bq.oss.lib.queries.parser.*;
+import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
+import com.bq.oss.lib.queries.parser.AggregationParser;
+import com.bq.oss.lib.queries.parser.CustomJsonParser;
+import com.bq.oss.lib.queries.parser.CustomSearchParser;
+import com.bq.oss.lib.queries.parser.DefaultPaginationParser;
+import com.bq.oss.lib.queries.parser.JacksonAggregationParser;
+import com.bq.oss.lib.queries.parser.JacksonQueryParser;
+import com.bq.oss.lib.queries.parser.JacksonSortParser;
+import com.bq.oss.lib.queries.parser.PaginationParser;
+import com.bq.oss.lib.queries.parser.QueryParser;
+import com.bq.oss.lib.queries.parser.SearchParser;
+import com.bq.oss.lib.queries.parser.SortParser;
 import com.bq.oss.lib.ws.api.provider.RemoteAddressProvider;
 import com.bq.oss.lib.ws.queries.QueryParametersProvider;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -30,7 +40,12 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
     @Bean
     public QueryParametersBuilder getQueryParametersBuilder() {
-        return new QueryParametersBuilder(getQueryParser(), getAggregationParser(), getSortParser(), getPaginationParser());
+        return new QueryParametersBuilder(getQueryParser(), getAggregationParser(), getSortParser(), getPaginationParser(),
+                getSearchParser());
+    }
+
+    private SearchParser getSearchParser() {
+        return new CustomSearchParser(getObjectMapper());
     }
 
     @Bean
@@ -70,4 +85,6 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
         objectMapper.registerModule(new JSR310Module());
         return objectMapper;
     }
+
+
 }

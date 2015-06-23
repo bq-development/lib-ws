@@ -9,14 +9,23 @@ import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
-import com.bq.oss.lib.queries.parser.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
 import com.bq.oss.lib.queries.builder.ResourceQueryBuilder;
 import com.bq.oss.lib.queries.jaxrs.QueryParameters;
-import com.bq.oss.lib.queries.request.*;
+import com.bq.oss.lib.queries.parser.CustomJsonParser;
+import com.bq.oss.lib.queries.parser.CustomSearchParser;
+import com.bq.oss.lib.queries.parser.DefaultPaginationParser;
+import com.bq.oss.lib.queries.parser.JacksonAggregationParser;
+import com.bq.oss.lib.queries.parser.JacksonQueryParser;
+import com.bq.oss.lib.queries.parser.JacksonSortParser;
+import com.bq.oss.lib.queries.request.Aggregation;
+import com.bq.oss.lib.queries.request.Count;
+import com.bq.oss.lib.queries.request.ResourceQuery;
+import com.bq.oss.lib.queries.request.Search;
+import com.bq.oss.lib.queries.request.Sort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.core.ExtendedUriInfo;
 import com.sun.jersey.api.core.HttpContext;
@@ -38,9 +47,11 @@ public class QueryParametersProviderTest {
 
     @Before
     public void setUp() throws Exception {
-        CustomJsonParser parser = new CustomJsonParser(new ObjectMapper().getFactory());
-
-        QueryParametersBuilder queryParametersBuilder = new QueryParametersBuilder(new JacksonQueryParser(parser), new JacksonAggregationParser(parser), new JacksonSortParser(parser), new DefaultPaginationParser());
+        ObjectMapper mapper = new ObjectMapper();
+        CustomJsonParser parser = new CustomJsonParser(mapper.getFactory());
+        QueryParametersBuilder queryParametersBuilder = new QueryParametersBuilder(new JacksonQueryParser(parser),
+                new JacksonAggregationParser(parser), new JacksonSortParser(parser), new DefaultPaginationParser(), new CustomSearchParser(
+                        mapper));
 
         QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, queryParametersBuilder);
 
@@ -57,7 +68,7 @@ public class QueryParametersProviderTest {
         params.add(QueryParametersProvider.API_SORT, "{\"price\":\"asc\"}");
         params.add(QueryParametersProvider.API_QUERY, "[{\"$eq\":{\"categories\":\"Metallica\"}}]");
         params.add(QueryParametersProvider.API_AGGREGATION, "{\"$count\":\"xxxx\"}");
-        params.add(QueryParametersProvider.API_SEARCH, "Title+Test+T1");
+        params.add(QueryParametersProvider.API_SEARCH, "{\"text\":\"Title+Test+T1\"}");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
@@ -70,10 +81,9 @@ public class QueryParametersProviderTest {
         assertThat(parameters.getAggregation()).isEqualTo(countOperator);
         Optional<Sort> sort = Optional.of(new Sort("ASC", "price"));
         assertThat(parameters.getSort()).isEqualTo(sort);
-        Optional<ResourceQuery> resourceQuery = Optional.of(new ResourceQueryBuilder().add("categories", "Metallica")
-                .build());
+        Optional<ResourceQuery> resourceQuery = Optional.of(new ResourceQueryBuilder().add("categories", "Metallica").build());
         assertThat(parameters.getQuery()).isEqualTo(resourceQuery);
-        assertThat(parameters.getSearch()).isEqualTo(Optional.of(new ResourceSearch("Title+Test+T1")));
+        assertThat(parameters.getSearch()).isEqualTo(Optional.of(new Search("Title+Test+T1")));
     }
 
     @Test

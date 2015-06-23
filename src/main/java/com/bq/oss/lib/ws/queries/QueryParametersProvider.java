@@ -13,9 +13,6 @@ import javax.ws.rs.ext.Provider;
 import com.bq.oss.lib.queries.builder.QueryParametersBuilder;
 import com.bq.oss.lib.queries.exception.InvalidParameterException;
 import com.bq.oss.lib.queries.jaxrs.QueryParameters;
-import com.bq.oss.lib.queries.parser.AggregationParser;
-import com.bq.oss.lib.queries.parser.QueryParser;
-import com.bq.oss.lib.queries.parser.SortParser;
 import com.bq.oss.lib.ws.annotation.Rest;
 import com.bq.oss.lib.ws.api.error.ErrorMessage;
 import com.bq.oss.lib.ws.api.error.ErrorResponseFactory;
@@ -31,8 +28,7 @@ import com.sun.jersey.spi.inject.InjectableProvider;
 /**
  * @author Rubén Carrasco
  */
-@Provider
-public final class QueryParametersProvider implements InjectableProvider<Rest, Parameter> {
+@Provider public final class QueryParametersProvider implements InjectableProvider<Rest, Parameter> {
 
     public static final String API_PAGE_SIZE = "api:pageSize";
     public static final String API_PAGE = "api:page";
@@ -71,13 +67,10 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
                 MultivaluedMap<String, String> params = context.getUriInfo().getQueryParameters();
 
                 try {
-                    return queryParametersBuilder.createQueryParameters(
-                            getIntegerParam(params, API_PAGE).orElse(0),
-                            getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize),
-                            maxPageSize, getStringParam(params, API_SORT),
-                            getListStringParam(params, API_QUERY), getListStringParam(params, API_CONDITION), getStringParam(params, API_AGGREGATION),
-                            getStringParam(params, API_SEARCH)
-                    );
+                    return queryParametersBuilder.createQueryParameters(getIntegerParam(params, API_PAGE).orElse(0),
+                            getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize), maxPageSize, getStringParam(params, API_SORT),
+                            getListStringParam(params, API_QUERY), getListStringParam(params, API_CONDITION),
+                            getStringParam(params, API_AGGREGATION), getStringParam(params, API_SEARCH));
                 } catch (InvalidParameterException e) {
                     throw toRequestException(e);
                 } catch (IllegalArgumentException e) {
@@ -91,16 +84,20 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
                         return new WebApplicationException(badRequestResponse(new Error("invalid_aggregation",
                                 ErrorMessage.INVALID_AGGREGATION.getMessage(e.getValue(), e.getMessage()))));
                     case PAGE:
-                        return new WebApplicationException(badRequestResponse(new Error("invalid_page", ErrorMessage.INVALID_PAGE.getMessage(e.getValue()))));
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_page",
+                                ErrorMessage.INVALID_PAGE.getMessage(e.getValue()))));
                     case PAGE_SIZE:
-                        return new WebApplicationException(badRequestResponse(new Error("invalid_page_size", ErrorMessage.INVALID_PAGE_SIZE.getMessage(
-                                e.getValue(), maxPageSize))));
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_page_size",
+                                ErrorMessage.INVALID_PAGE_SIZE.getMessage(e.getValue(), maxPageSize))));
                     case QUERY:
-                        return new WebApplicationException(badRequestResponse(new Error("invalid_query", ErrorMessage.INVALID_QUERY.getMessage(e.getValue(),
-                                e.getMessage()))));
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_query",
+                                ErrorMessage.INVALID_QUERY.getMessage(e.getValue(), e.getMessage()))));
                     case SORT:
-                        return new WebApplicationException(badRequestResponse(new Error("invalid_sort", ErrorMessage.INVALID_SORT.getMessage(e.getValue(),
-                                e.getMessage()))));
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_sort",
+                                ErrorMessage.INVALID_SORT.getMessage(e.getValue(), e.getMessage()))));
+                    case SEARCH:
+                        return new WebApplicationException(badRequestResponse(new Error("invalid_search",
+                                ErrorMessage.INVALID_SEARCH.getMessage(e.getValue(), e.getMessage()))));
                     default:
                         return new WebApplicationException(ErrorResponseFactory.getInstance().badRequest());
                 }
@@ -115,8 +112,7 @@ public final class QueryParametersProvider implements InjectableProvider<Rest, P
             }
 
             private Optional<java.lang.Integer> getIntegerParam(MultivaluedMap<String, String> params, String key) {
-                return params.containsKey(key) ? Optional.of(Integer.valueOf(params.get(key).get(0))) : Optional
-                        .empty();
+                return params.containsKey(key) ? Optional.of(Integer.valueOf(params.get(key).get(0))) : Optional.empty();
             }
 
             private Optional<String> getStringParam(MultivaluedMap<String, String> params, String key) {
