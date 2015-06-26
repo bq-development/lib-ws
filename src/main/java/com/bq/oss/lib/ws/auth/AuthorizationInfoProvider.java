@@ -1,36 +1,71 @@
 package com.bq.oss.lib.ws.auth;
 
-import com.sun.jersey.api.core.HttpContext;
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.core.spi.component.ComponentScope;
-import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.InjectableProvider;
+import io.dropwizard.auth.Auth;
 
-import javax.ws.rs.core.Context;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.ext.Provider;
-import java.lang.reflect.Type;
 
-/**
- * @author Francisco Sanchez
- */
-@Provider
-public class AuthorizationInfoProvider extends AbstractHttpContextInjectable<AuthorizationInfo> implements
-		InjectableProvider<Context, Type> {
+import org.glassfish.hk2.api.Factory;
+import org.glassfish.hk2.api.InjectionResolver;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.api.TypeLiteral;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.server.internal.inject.AbstractContainerRequestValueFactory;
+import org.glassfish.jersey.server.internal.inject.AbstractValueFactoryProvider;
+import org.glassfish.jersey.server.internal.inject.MultivaluedParameterExtractorProvider;
+import org.glassfish.jersey.server.internal.inject.ParamInjectionResolver;
+import org.glassfish.jersey.server.model.Parameter;
+import org.glassfish.jersey.server.model.Parameter.Source;
+import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
 
-	@Override
-	public Injectable getInjectable(ComponentContext componentContext, Context context, Type type) {
-		return type.equals(AuthorizationInfo.class) ? this : null;
-	}
+import com.bq.oss.lib.ws.SpringJerseyProvider;
 
-	@Override
-	public ComponentScope getScope() {
-		return ComponentScope.PerRequest;
-	}
+public class AuthorizationInfoProvider implements SpringJerseyProvider {
 
-	@Override
-	public AuthorizationInfo getValue(HttpContext c) {
-		return (AuthorizationInfo) c.getProperties().get(AuthorizationRequestFilter.AUTHORIZATION_INFO_PROPERTIES_KEY);
-	}
+    public static class Binder extends AbstractBinder {
+        @Override
+        protected void configure() {
+            bind(AuthorizationInfoContextFactoryProvider.class).to(ValueFactoryProvider.class).in(Singleton.class);
+            bind(AuthorizationInfoInjectionResolver.class).to(new TypeLiteral<InjectionResolver<Auth>>() {}).in(Singleton.class);
+        }
+    }
+
+    public static class AuthorizationInfoInjectionResolver extends ParamInjectionResolver<Auth> {
+        public AuthorizationInfoInjectionResolver() {
+            super(AuthorizationInfoContextFactoryProvider.class);
+        }
+    }
+
+    @Provider public static class AuthorizationInfoContextFactoryProvider extends AbstractValueFactoryProvider {
+
+        @Inject
+        protected AuthorizationInfoContextFactoryProvider(MultivaluedParameterExtractorProvider mpep, ServiceLocator locator) {
+            super(mpep, locator, Source.UNKNOWN);
+        }
+
+        public AuthorizationInfoContextFactoryProvider() {
+            super(null, null, Source.UNKNOWN);
+        }
+
+        @Override
+        public Factory<?> createValueFactory(Parameter parameter) {
+            if (parameter.getRawType().equals(AuthorizationInfo.class) && parameter.getAnnotation(Auth.class) != null) {
+                return new AbstractContainerRequestValueFactory<AuthorizationInfo>() {
+                    @Override
+                    public AuthorizationInfo provide() {
+                        return (AuthorizationInfo) getContainerRequest().getProperty(
+                                AuthorizationRequestFilter.AUTHORIZATION_INFO_PROPERTIES_KEY);
+                    }
+                };
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public org.glassfish.hk2.utilities.Binder getBinder() {
+        return new Binder();
+    }
 
 }

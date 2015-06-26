@@ -1,47 +1,70 @@
 package com.bq.oss.lib.ws.api.provider;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
 
+import org.glassfish.hk2.api.Factory;
+import org.glassfish.hk2.api.InjectionResolver;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.api.TypeLiteral;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.server.internal.inject.AbstractContainerRequestValueFactory;
+import org.glassfish.jersey.server.internal.inject.AbstractValueFactoryProvider;
+import org.glassfish.jersey.server.internal.inject.MultivaluedParameterExtractorProvider;
+import org.glassfish.jersey.server.internal.inject.ParamInjectionResolver;
+import org.glassfish.jersey.server.model.Parameter;
+import org.glassfish.jersey.server.model.Parameter.Source;
+import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
+
+import com.bq.oss.lib.ws.SpringJerseyProvider;
 import com.bq.oss.lib.ws.annotation.RemoteAddress;
-import com.sun.jersey.api.model.Parameter;
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.core.spi.component.ComponentScope;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.InjectableProvider;import java.lang.Override;import java.lang.String;
 
-@Provider
-public class RemoteAddressProvider implements InjectableProvider<RemoteAddress, Parameter> {
+public class RemoteAddressProvider implements SpringJerseyProvider {
 
-	@Context
-	private HttpServletRequest request;
 
-	public RemoteAddressProvider() {
-	}
+    public static class Binder extends AbstractBinder {
+        @Override
+        protected void configure() {
+            bind(RemoteAddressFactoryProvider.class).to(ValueFactoryProvider.class).in(Singleton.class);
+            bind(RemoteAddressInjectionResolver.class).to(new TypeLiteral<InjectionResolver<RemoteAddress>>() {}).in(Singleton.class);
+        }
+    }
 
-	public RemoteAddressProvider(HttpServletRequest request) {
-		super();
-		this.request = request;
-	}
+    public static class RemoteAddressInjectionResolver extends ParamInjectionResolver<RemoteAddress> {
+        public RemoteAddressInjectionResolver() {
+            super(RemoteAddressFactoryProvider.class);
+        }
+    }
 
-	@Override
-	public ComponentScope getScope() {
-		return ComponentScope.PerRequest;
-	}
+    @Provider public static class RemoteAddressFactoryProvider extends AbstractValueFactoryProvider {
 
-	@Override
-	public Injectable<String> getInjectable(ComponentContext ic, RemoteAddress a, Parameter c) {
-		if (String.class != c.getParameterClass()) {
-			return null;
-		}
-		return new Injectable<String>() {
+        @Context private HttpServletRequest request;
 
-			@Override
-			public String getValue() {
+        @Inject
+        protected RemoteAddressFactoryProvider(MultivaluedParameterExtractorProvider mpep, ServiceLocator locator) {
+            super(mpep, locator, Source.UNKNOWN);
+        }
 
-				return request.getRemoteAddr();
-			}
-		};
-	}
+        @Override
+        public Factory<?> createValueFactory(Parameter parameter) {
+            if (parameter.getAnnotation(RemoteAddress.class) != null) {
+                return new AbstractContainerRequestValueFactory<String>() {
+                    @Override
+                    public String provide() {
+                        return request.getRemoteAddr();
+                    }
+                };
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public org.glassfish.hk2.utilities.Binder getBinder() {
+        return new Binder();
+    }
+
 }

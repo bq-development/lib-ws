@@ -1,14 +1,20 @@
 package com.bq.oss.lib.ws.queries;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.glassfish.jersey.server.ContainerRequest;
+import org.glassfish.jersey.server.ExtendedUriInfo;
+import org.glassfish.jersey.server.model.Parameter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,12 +32,10 @@ import com.bq.oss.lib.queries.request.Count;
 import com.bq.oss.lib.queries.request.ResourceQuery;
 import com.bq.oss.lib.queries.request.Search;
 import com.bq.oss.lib.queries.request.Sort;
+import com.bq.oss.lib.ws.annotation.Rest;
+import com.bq.oss.lib.ws.queries.QueryParametersProvider.QueryParametersFactory;
+import com.bq.oss.lib.ws.queries.QueryParametersProvider.QueryParametersFactoryProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jersey.api.core.ExtendedUriInfo;
-import com.sun.jersey.api.core.HttpContext;
-import com.sun.jersey.api.model.Parameter;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 
 /**
  * @author Rubén Carrasco
@@ -41,9 +45,11 @@ public class QueryParametersProviderTest {
     private static final int MAX_PAGE_SIZE = 50;
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    HttpContext context;
-    AbstractHttpContextInjectable<QueryParameters> injectable;
     MultivaluedMap<String, String> params;
+    ContainerRequest request;
+    QueryParametersFactory factory;
+
+    @Rest public int restAnnotation;
 
     @Before
     public void setUp() throws Exception {
@@ -54,15 +60,21 @@ public class QueryParametersProviderTest {
                         mapper));
 
         QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, queryParametersBuilder);
-
-        Parameter parameter = new Parameter(null, null, null, null, null, QueryParameters.class);
-        injectable = (AbstractHttpContextInjectable<QueryParameters>) provider.getInjectable(null, null, parameter);
-        context = mock(HttpContext.class);
+        QueryParametersFactoryProvider queryParametersFactoryProvider = new QueryParametersProvider.QueryParametersFactoryProvider(null,
+                null);
+        Parameter parameter = Parameter.create(null, null, false, QueryParameters.class, null, this.getClass().getField("restAnnotation")
+                .getAnnotations());
+        QueryParametersFactory createValueFactory = (QueryParametersFactory) queryParametersFactoryProvider.createValueFactory(parameter);
+        factory = spy(createValueFactory);
+        request = mock(ContainerRequest.class);
+        doReturn(request).when(factory).getContainerRequestBind();
     }
 
     @Test
     public void test() {
-        params = new MultivaluedMapImpl();
+
+
+        params = new MultivaluedHashMap();
         params.add(QueryParametersProvider.API_PAGE, "4");
         params.add(QueryParametersProvider.API_PAGE_SIZE, "20");
         params.add(QueryParametersProvider.API_SORT, "{\"price\":\"asc\"}");
@@ -72,9 +84,9 @@ public class QueryParametersProviderTest {
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
 
-        QueryParameters parameters = injectable.getValue(context);
+        QueryParameters parameters = factory.provide();
         assertThat(parameters.getPagination().getPage()).isEqualTo(4);
         assertThat(parameters.getPagination().getPageSize()).isEqualTo(20);
         Optional<Aggregation> countOperator = Optional.of(new Count("xxxx"));
@@ -88,12 +100,12 @@ public class QueryParametersProviderTest {
 
     @Test
     public void testDefaults() {
-        params = new MultivaluedMapImpl();
+        params = new MultivaluedHashMap();
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
 
-        QueryParameters parameters = injectable.getValue(context);
+        QueryParameters parameters = factory.provide();
         assertThat(parameters.getPagination().getPage()).isEqualTo(0);
         assertThat(parameters.getPagination().getPageSize()).isEqualTo(DEFAULT_PAGE_SIZE);
         assertThat(parameters.getAggregation()).isEqualTo(Optional.empty());
@@ -103,56 +115,56 @@ public class QueryParametersProviderTest {
 
     @Test(expected = WebApplicationException.class)
     public void testBadParameters1() {
-        params = new MultivaluedMapImpl();
+        params = new MultivaluedHashMap();
         params.add(QueryParametersProvider.API_PAGE, "asdf");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
-        injectable.getValue(context);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
+        factory.provide();
     }
 
     @Test(expected = WebApplicationException.class)
     public void testBadParameters2() {
-        params = new MultivaluedMapImpl();
+        params = new MultivaluedHashMap();
         params.add(QueryParametersProvider.API_PAGE_SIZE, "20000");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
-        injectable.getValue(context);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
+        factory.provide();
     }
 
     @Test(expected = WebApplicationException.class)
     public void testBadParameters3() {
-        params = new MultivaluedMapImpl();
+        params = new MultivaluedHashMap();
         params.add(QueryParametersProvider.API_SORT, "{\"price\":\"qwer\"}");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
-        injectable.getValue(context);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
+        factory.provide();
     }
 
     @Test(expected = WebApplicationException.class)
     public void testBadParameters4() {
-        params = new MultivaluedMapImpl();
+        params = new MultivaluedHashMap();
         params.add(QueryParametersProvider.API_QUERY, "[{\"$eq\":\"categories\":\"Metallica\"}}]");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
-        injectable.getValue(context);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
+        factory.provide();
     }
 
     @Test(expected = WebApplicationException.class)
     public void testBadParameters5() {
-        params = new MultivaluedMapImpl();
+        params = new MultivaluedHashMap();
         params.add(QueryParametersProvider.API_AGGREGATION, "{\"$asdf\":\"xxxx\"}");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
-        when(context.getUriInfo()).thenReturn(uriInfoMock);
-        injectable.getValue(context);
+        when(request.getUriInfo()).thenReturn(uriInfoMock);
+        factory.provide();
     }
 }
