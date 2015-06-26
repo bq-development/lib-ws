@@ -1,19 +1,20 @@
 package com.bq.oss.lib.ws.filter;
 
-import com.sun.jersey.spi.container.ContainerResponseFilter;
+import javax.ws.rs.container.ContainerResponseFilter;
+
 
 /**
  * Created by Francisco Sanchez on 13/01/15.
  */
 public abstract class OptionalContainerResponseFilter implements ContainerResponseFilter {
-	private boolean enabled;
+    private final boolean enabled;
 
-	public OptionalContainerResponseFilter(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public OptionalContainerResponseFilter(boolean enabled) {
+        this.enabled = enabled;
+    }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
 }

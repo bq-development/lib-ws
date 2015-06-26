@@ -44,7 +44,8 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
                 getSearchParser());
     }
 
-    private SearchParser getSearchParser() {
+    @Bean
+    public SearchParser getSearchParser() {
         return new CustomSearchParser(getObjectMapper());
     }
 

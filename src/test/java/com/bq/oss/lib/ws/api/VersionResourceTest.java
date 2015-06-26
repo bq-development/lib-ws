@@ -4,13 +4,12 @@
 package com.bq.oss.lib.ws.api;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import io.dropwizard.testing.junit.ResourceTestRule;
 
 import java.util.Properties;
 
 import org.junit.ClassRule;
 import org.junit.Test;
-
-import io.dropwizard.testing.junit.ResourceTestRule;
 
 /**
  * @author Alexander De Leon
@@ -18,15 +17,14 @@ import io.dropwizard.testing.junit.ResourceTestRule;
  */
 public class VersionResourceTest {
 
-	@ClassRule
-	public static final ResourceTestRule RULE = ResourceTestRule.builder().addResource(new VersionResource()).build();
+    @ClassRule public static final ResourceTestRule RULE = ResourceTestRule.builder().addResource(new VersionResource()).build();
 
-	@Test
-	public void testVersionResponse() {
-		Properties prop = new Properties();
-		prop.setProperty("build.a", "1");
-		prop.setProperty("build.b", "2");
-		assertThat(RULE.client().resource("/version").get(Properties.class)).isEqualTo(prop);
-	}
+    @Test
+    public void testVersionResponse() {
+        Properties prop = new Properties();
+        prop.setProperty("build.a", "1");
+        prop.setProperty("build.b", "2");
+        assertThat(RULE.client().target("/version").request().get(Properties.class)).isEqualTo(prop);
+    }
 
 }
