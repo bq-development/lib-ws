@@ -13,6 +13,7 @@ import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import com.bq.oss.lib.ws.api.error.JsonValidationExceptionMapper;
+import com.massrelevance.dropwizard.bundles.ScalaBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -169,6 +170,7 @@ public abstract class ServiceRunner<T> {
 
 		@Override
 		public void initialize(Bootstrap<Configuration> bootstrap) {
+			bootstrap.addBundle(new ScalaBundle());
 			configureObjectMapper(bootstrap.getObjectMapper());
 			bootstrap(bootstrap);
 			bootstrap.addCommand(cliCommand);
