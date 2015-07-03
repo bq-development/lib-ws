@@ -17,7 +17,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.message.DeflateEncoder;
 import org.glassfish.jersey.message.GZipEncoder;
-import org.glassfish.jersey.server.ServerProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -70,7 +69,6 @@ public abstract class ServiceRunner<T> {
     protected abstract String getName();
 
     protected void configureService(Environment environment, ApplicationContext context) {
-        environment.jersey().property(ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, false);
     }
 
     protected void bootstrap(Bootstrap<Configuration> bootstrap) {}
@@ -101,6 +99,7 @@ public abstract class ServiceRunner<T> {
         // Replace exception mappers with custom implementations
         replaceExceptionMapper(environment, ConstraintViolationExceptionMapper.class, new JsonValidationExceptionMapper());
         replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class, new JsonValidationExceptionMapper().new JacksonAdapter());
+
         environment.jersey().register(NotFoundExceptionMapper.class);
         environment.jersey().register(URISyntaxExceptionMapper.class);
         environment.jersey().register(GenericExceptionMapper.class);

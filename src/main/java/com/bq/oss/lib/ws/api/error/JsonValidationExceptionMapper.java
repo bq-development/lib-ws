@@ -12,6 +12,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.bq.oss.lib.ws.model.Error;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -20,6 +23,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  * 
  */
 public class JsonValidationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
+
+
+    private static final Logger LOG = LoggerFactory.getLogger(JsonValidationExceptionMapper.class);
 
 	private final int notProcessableResponseStatus = 422;
 
@@ -37,6 +43,7 @@ public class JsonValidationExceptionMapper implements ExceptionMapper<Constraint
 
 	@Override
 	public Response toResponse(ConstraintViolationException exception) {
+        LOG.info("!!!!!!!!!!!!!!!!!!!!!!! jsonValidation!");
 		return Response.status(notProcessableResponseStatus).type(MediaType.APPLICATION_JSON)
 				.entity(new Error(error, generateDescription(exception.getConstraintViolations()))).build();
 	}
