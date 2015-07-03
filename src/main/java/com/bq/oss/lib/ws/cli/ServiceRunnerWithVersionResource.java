@@ -5,6 +5,7 @@ package com.bq.oss.lib.ws.cli;
 
 import com.bq.oss.lib.ws.api.ArtifactIdVersionResource;
 import io.dropwizard.setup.Environment;
+import org.glassfish.jersey.server.ServerProperties;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -23,7 +24,8 @@ public abstract class ServiceRunnerWithVersionResource<T> extends ServiceRunner<
 	 */
 	@Override
 	protected void configureService(Environment environment, ApplicationContext context) {
-		environment.jersey().register(new ArtifactIdVersionResource(getArtifactId()));
+        environment.jersey().property(ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, false);
+        environment.jersey().register(new ArtifactIdVersionResource(getArtifactId()));
 	}
 
 	protected abstract String getArtifactId();
