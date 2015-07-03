@@ -3,6 +3,27 @@
  */
 package com.bq.oss.lib.ws.cli;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.servlet.DispatcherType;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.ext.ExceptionMapper;
+
+import org.glassfish.jersey.client.filter.EncodingFilter;
+import org.glassfish.jersey.message.DeflateEncoder;
+import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.ServerProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
+
 import com.bq.oss.lib.ws.SpringJerseyProvider;
 import com.bq.oss.lib.ws.api.error.GenericExceptionMapper;
 import com.bq.oss.lib.ws.api.error.JsonValidationExceptionMapper;
@@ -15,6 +36,7 @@ import com.bq.oss.lib.ws.json.serialization.EmptyEntitiesAllowedJacksonMessageBo
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
@@ -24,24 +46,6 @@ import io.dropwizard.server.ServerFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.util.Generics;
-import org.glassfish.jersey.client.filter.EncodingFilter;
-import org.glassfish.jersey.message.DeflateEncoder;
-import org.glassfish.jersey.message.GZipEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
-
-import javax.servlet.DispatcherType;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.ext.ExceptionMapper;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Alexander De Leon
@@ -65,7 +69,9 @@ public abstract class ServiceRunner<T> {
 
     protected abstract String getName();
 
-    protected abstract void configureService(Environment environment, ApplicationContext context);
+    protected void configureService(Environment environment, ApplicationContext context) {
+        environment.jersey().property(ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, false);
+    }
 
     protected void bootstrap(Bootstrap<Configuration> bootstrap) {}
 
