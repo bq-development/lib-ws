@@ -14,6 +14,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
 import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.message.DeflateEncoder;
 import org.glassfish.jersey.message.GZipEncoder;
@@ -70,7 +71,6 @@ public abstract class ServiceRunner<T> {
     protected abstract String getName();
 
     protected void configureService(Environment environment, ApplicationContext context) {
-        environment.jersey().property(ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, false);
     }
 
     protected void bootstrap(Bootstrap<Configuration> bootstrap) {}
@@ -89,7 +89,7 @@ public abstract class ServiceRunner<T> {
     private void configureDefaultProviders(Environment environment) {
         environment.jersey().register(new GsonMessageReaderWriterProvider());
         environment.jersey().register(
-                new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
+                new JacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
     }
 
     private void configureDropWizard(Configuration configuration, ApplicationContext applicationContext) {
