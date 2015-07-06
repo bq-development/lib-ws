@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.PreMatching;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander De Leon
  * 
  */
+@PreMatching
 public class MatrixEncodingRequestFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(MatrixEncodingRequestFilter.class);
