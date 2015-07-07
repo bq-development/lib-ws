@@ -7,8 +7,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MediaType;
@@ -42,7 +40,7 @@ public class CharsetResponseFilterTest {
         when(request.getMethod()).thenReturn("GET");
         when(response.getMediaType()).thenReturn(javax.ws.rs.core.MediaType.APPLICATION_ATOM_XML_TYPE);
         filter.filter(request, response);
-        assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo("application/atom+xml; charset=UTF-8");
+        assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo(MediaType.APPLICATION_ATOM_XML_TYPE.withCharset("UTF-8"));
     }
 
     @Test
@@ -50,14 +48,14 @@ public class CharsetResponseFilterTest {
         when(request.getMethod()).thenReturn("GET");
         when(response.getMediaType()).thenReturn(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
         filter.filter(request, response);
-        assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo("application/x-www-form-urlencoded; charset=UTF-8");
+        assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo(MediaType.APPLICATION_FORM_URLENCODED_TYPE.withCharset("UTF-8"));
     }
 
     @Test
     public void testCharsetDefinedInRespinse() {
         when(request.getMethod()).thenReturn("GET");
-        when(response.getMediaType()).thenReturn(new MediaType("application", "json", Collections.singletonMap("charset", "UTF-16")));
+        when(response.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-16"));
         filter.filter(request, response);
-        assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo("application/json;charset=UTF-16");
+        assertThat(responseHeaders.getFirst("Content-Type")).isEqualTo(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-16"));
     }
 }
