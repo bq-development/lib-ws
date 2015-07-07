@@ -20,11 +20,11 @@ import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
 
 import com.bq.oss.lib.ws.SpringJerseyProvider;
 
-public class BasicAuthProvider implements SpringJerseyProvider {
+public class OAuthProvider implements SpringJerseyProvider {
 
     private static AuthFactory factory;
 
-    public BasicAuthProvider(AuthFactory factory) {
+    public OAuthProvider(AuthFactory factory) {
         this.factory = factory;
     }
 

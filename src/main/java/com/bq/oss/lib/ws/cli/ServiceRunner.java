@@ -3,6 +3,14 @@
  */
 package com.bq.oss.lib.ws.cli;
 
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.logging.LoggingFactory;
+import io.dropwizard.server.ServerFactory;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.dropwizard.util.Generics;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -12,7 +20,6 @@ import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.ext.ExceptionMapper;
 
 import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.message.DeflateEncoder;
@@ -36,16 +43,6 @@ import com.bq.oss.lib.ws.json.serialization.EmptyEntitiesAllowedJacksonMessageBo
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
-import io.dropwizard.jersey.validation.ConstraintViolationExceptionMapper;
-import io.dropwizard.logging.LoggingFactory;
-import io.dropwizard.server.ServerFactory;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.util.Generics;
 
 /**
  * @author Alexander De Leon
@@ -99,8 +96,8 @@ public abstract class ServiceRunner<T> {
 
     private void configureFiltersAndInterceptors(Environment environment, ApplicationContext applicationContext) {
         // Replace exception mappers with custom implementations
-        replaceExceptionMapper(environment, ConstraintViolationExceptionMapper.class, new JsonValidationExceptionMapper());
-        replaceExceptionMapper(environment, JsonProcessingExceptionMapper.class, new JsonValidationExceptionMapper().new JacksonAdapter());
+        environment.jersey().register(new JsonValidationExceptionMapper());
+        environment.jersey().register(new JsonValidationExceptionMapper().new JacksonAdapter());
         environment.jersey().register(NotFoundExceptionMapper.class);
         environment.jersey().register(URISyntaxExceptionMapper.class);
         environment.jersey().register(GenericExceptionMapper.class);
@@ -144,22 +141,6 @@ public abstract class ServiceRunner<T> {
                 environment.jersey().register(entry.getValue().getBinder());
             }
         }
-    }
-
-    private void replaceExceptionMapper(Environment environment,
-            Class<? extends ExceptionMapper<? extends Throwable>> exceptionMapperToBeReplaced,
-            ExceptionMapper<? extends Throwable> customExceptionMapper) {
-        Object exceptionMapper = null;
-        for (Object singleton : environment.jersey().getResourceConfig().getSingletons()) {
-            if (exceptionMapperToBeReplaced.isInstance(singleton)) {
-                exceptionMapper = singleton;
-                break;
-            }
-        }
-        if (exceptionMapper != null) {
-            environment.jersey().getResourceConfig().getSingletons().remove(exceptionMapper);
-        }
-        environment.jersey().register(customExceptionMapper);
     }
 
     private Class<T> getIocConfigurationClass() {

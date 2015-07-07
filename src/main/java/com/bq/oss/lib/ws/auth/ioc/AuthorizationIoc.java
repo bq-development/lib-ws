@@ -4,8 +4,6 @@
 package com.bq.oss.lib.ws.auth.ioc;
 
 import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.basic.BasicAuthFactory;
-import io.dropwizard.auth.basic.BasicCredentials;
 import io.dropwizard.auth.oauth.OAuthFactory;
 
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -28,7 +26,6 @@ import com.bq.oss.lib.ws.auth.AuthorizationInfo;
 import com.bq.oss.lib.ws.auth.AuthorizationInfoProvider;
 import com.bq.oss.lib.ws.auth.AuthorizationRequestFilter;
 import com.bq.oss.lib.ws.auth.AuthorizationRulesService;
-import com.bq.oss.lib.ws.auth.BasicAuthenticator;
 import com.bq.oss.lib.ws.auth.BearerTokenAuthenticator;
 import com.bq.oss.lib.ws.auth.CookieOAuthFactory;
 import com.bq.oss.lib.ws.auth.DefaultAuthorizationRulesService;
@@ -130,11 +127,6 @@ import com.google.gson.JsonObject;
     }
 
     @Bean
-    public Authenticator<BasicCredentials, AuthorizationInfo> authenticatorBasic() {
-        return new BasicAuthenticator();
-    }
-
-    @Bean
     public AuthorizationInfoProvider getauthorizationInfoProvider() {
         return new AuthorizationInfoProvider();
     }
@@ -143,12 +135,6 @@ import com.google.gson.JsonObject;
     public OAuthFactory<AuthorizationInfo> getOAuthProvider(Authenticator<String, AuthorizationInfo> authenticator,
             @Value("${auth.realm}") String realm) {
         return new OAuthFactory<>(authenticator, realm, AuthorizationInfo.class);
-    }
-
-    @Bean(name = "basicProvider")
-    public BasicAuthFactory<AuthorizationInfo> getBasicProvider(Authenticator<BasicCredentials, AuthorizationInfo> authenticator,
-            @Value("${auth.realm}") String realm) {
-        return new BasicAuthFactory<>(authenticator, realm, AuthorizationInfo.class);
     }
 
     @Bean(name = "cookieAuthProvider")

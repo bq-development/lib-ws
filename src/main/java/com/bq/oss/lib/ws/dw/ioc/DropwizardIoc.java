@@ -1,10 +1,18 @@
 /*
-
+ * 
  * Copyright (C) 2013 StarTIC
  */
 package com.bq.oss.lib.ws.dw.ioc;
 
-import io.dropwizard.logging.*;
+import io.dropwizard.jetty.GzipFilterFactory;
+import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.logging.AppenderFactory;
+import io.dropwizard.logging.ConsoleAppenderFactory;
+import io.dropwizard.logging.FileAppenderFactory;
+import io.dropwizard.logging.LoggingFactory;
+import io.dropwizard.logging.SyslogAppenderFactory;
+import io.dropwizard.server.DefaultServerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,28 +22,23 @@ import ch.qos.logback.classic.Level;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.jetty.GzipFilterFactory;
-import io.dropwizard.jetty.HttpConnectorFactory;
-import io.dropwizard.server.DefaultServerFactory;
-
 /**
  * @author Alexander De Leon
  */
-@Configuration
-public class DropwizardIoc {
+@Configuration public class DropwizardIoc {
 
-    @Autowired
-    private Environment env;
+    @Autowired private Environment env;
 
     @Bean
     public DefaultServerFactory getHttpConfiguration() {
         DefaultServerFactory configuration = new DefaultServerFactory();
-        ((HttpConnectorFactory) configuration.getApplicationConnectors().get(0))
-                .setPort(env.getProperty("dw.http.port", Integer.class, 8080));
-        ((HttpConnectorFactory) configuration.getAdminConnectors().get(0))
-                .setPort(env.getProperty("dw.http.adminPort", Integer.class, 8081));
+        ((HttpConnectorFactory) configuration.getApplicationConnectors().get(0)).setPort(env.getProperty("dw.http.port", Integer.class,
+                8080));
+        ((HttpConnectorFactory) configuration.getAdminConnectors().get(0)).setPort(env
+                .getProperty("dw.http.adminPort", Integer.class, 8081));
         configuration.getRequestLogFactory().setAppenders(getLogConfiguration());
         configuration.setGzipFilterFactory(getGzipConfiguration());
+        configuration.setRegisterDefaultExceptionMappers(false);
         return configuration;
     }
 
