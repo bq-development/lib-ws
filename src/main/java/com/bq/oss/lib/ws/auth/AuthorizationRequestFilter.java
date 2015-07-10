@@ -8,8 +8,10 @@ import io.dropwizard.auth.oauth.OAuthFactory;
 
 import java.util.Set;
 
+import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -36,7 +38,7 @@ import com.google.gson.JsonObject;
  * @author Alexander De Leon
  * 
  */
-public class AuthorizationRequestFilter implements ContainerRequestFilter {
+@Priority(Priorities.AUTHORIZATION) public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
 

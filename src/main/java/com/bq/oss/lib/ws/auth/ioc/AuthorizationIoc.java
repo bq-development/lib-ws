@@ -33,6 +33,7 @@ import com.bq.oss.lib.ws.auth.DefaultAuthorizationRulesService;
 import com.bq.oss.lib.ws.auth.JsonUnauthorizedHandler;
 import com.bq.oss.lib.ws.auth.repository.AuthorizationRulesRepository;
 import com.bq.oss.lib.ws.auth.repository.RedisAuthorizationRulesRepository;
+import com.bq.oss.lib.ws.filter.RequestInformationRequestFilter;
 import com.bq.oss.lib.ws.health.AuthorizationRedisHealthCheck;
 import com.bq.oss.lib.ws.redis.GsonRedisSerializer;
 import com.google.gson.JsonObject;
@@ -169,6 +170,11 @@ import com.google.gson.JsonObject;
     @Bean
     public AuthorizationRedisHealthCheck getAuthorizationRedisHealthCheck(RedisTemplate<String, JsonObject> redisTemplate) {
         return new AuthorizationRedisHealthCheck(redisTemplate);
+    }
+
+    @Bean
+    public RequestInformationRequestFilter getRequestInformationRequestFilter() {
+        return new RequestInformationRequestFilter();
     }
 
     private ContainerRequestFilter emptyFilter() {
