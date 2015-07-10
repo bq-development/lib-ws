@@ -2,6 +2,7 @@ package com.bq.oss.lib.ws.auth;
 
 import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.UnauthorizedHandler;
 import io.dropwizard.auth.oauth.OAuthFactory;
 
 import java.util.Arrays;
@@ -53,6 +54,10 @@ public class CookieOAuthFactory<T> extends AuthFactory<String, T> {
     @Override
     public AuthFactory<String, T> clone(boolean required) {
         return oAuthFactory.clone(required);
+    }
+
+    public void responseBuilder(UnauthorizedHandler unauthorizedHandler) {
+        oAuthFactory.responseBuilder(unauthorizedHandler);
     }
 
     @Override

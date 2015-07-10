@@ -4,6 +4,7 @@
 package com.bq.oss.lib.ws.auth.ioc;
 
 import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.UnauthorizedHandler;
 import io.dropwizard.auth.oauth.OAuthFactory;
 
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -29,6 +30,7 @@ import com.bq.oss.lib.ws.auth.AuthorizationRulesService;
 import com.bq.oss.lib.ws.auth.BearerTokenAuthenticator;
 import com.bq.oss.lib.ws.auth.CookieOAuthFactory;
 import com.bq.oss.lib.ws.auth.DefaultAuthorizationRulesService;
+import com.bq.oss.lib.ws.auth.JsonUnauthorizedHandler;
 import com.bq.oss.lib.ws.auth.repository.AuthorizationRulesRepository;
 import com.bq.oss.lib.ws.auth.repository.RedisAuthorizationRulesRepository;
 import com.bq.oss.lib.ws.health.AuthorizationRedisHealthCheck;
@@ -131,16 +133,25 @@ import com.google.gson.JsonObject;
         return new AuthorizationInfoProvider();
     }
 
+    @Bean
+    public UnauthorizedHandler getUnauthorizedHandler() {
+        return new JsonUnauthorizedHandler();
+    }
+
     @Bean(name = "authProvider")
     public OAuthFactory<AuthorizationInfo> getOAuthProvider(Authenticator<String, AuthorizationInfo> authenticator,
             @Value("${auth.realm}") String realm) {
-        return new OAuthFactory<>(authenticator, realm, AuthorizationInfo.class);
+        OAuthFactory<AuthorizationInfo> oAuthFactory = new OAuthFactory<>(authenticator, realm, AuthorizationInfo.class);
+        oAuthFactory.responseBuilder(getUnauthorizedHandler());
+        return oAuthFactory;
     }
 
     @Bean(name = "cookieAuthProvider")
     public CookieOAuthFactory<AuthorizationInfo> getCookieOAuthProvider(Authenticator<String, AuthorizationInfo> authenticator,
             @Value("${auth.realm}") String realm) {
-        return new CookieOAuthFactory<>(authenticator, realm, AuthorizationInfo.class);
+        CookieOAuthFactory<AuthorizationInfo> cookieOAuthFactory = new CookieOAuthFactory<>(authenticator, realm, AuthorizationInfo.class);
+        cookieOAuthFactory.responseBuilder(getUnauthorizedHandler());
+        return cookieOAuthFactory;
     }
 
     @Bean
