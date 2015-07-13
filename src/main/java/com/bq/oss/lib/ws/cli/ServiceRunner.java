@@ -85,8 +85,7 @@ public abstract class ServiceRunner<T> {
 
     private void configureDefaultProviders(Environment environment) {
         environment.jersey().register(new GsonMessageReaderWriterProvider());
-        environment.jersey().register(
-                new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
+        environment.jersey().getResourceConfig().register(new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()), 1);
     }
 
     private void configureDropWizard(Configuration configuration, ApplicationContext applicationContext) {
