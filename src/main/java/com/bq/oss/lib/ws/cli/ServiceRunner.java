@@ -49,9 +49,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  */
 public abstract class ServiceRunner<T> {
-
-
     private static final Logger LOG = LoggerFactory.getLogger(ServiceRunner.class);
+    private static final int HIGH_PRIORITY = 1;
     private final ServiceRunnerApplication application = new ServiceRunnerApplication();
 
     public final void run(String[] arguments) throws Exception {
@@ -85,8 +84,8 @@ public abstract class ServiceRunner<T> {
 
     private void configureDefaultProviders(Environment environment) {
         environment.jersey().register(new GsonMessageReaderWriterProvider());
-        environment.jersey().register(
-                new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
+        // EmptyEntitiesAllowedJacksonMessageBodyProvider Override JacksonMessageBodyProvider to allow null entities
+        environment.jersey().getResourceConfig().register(new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()), HIGH_PRIORITY);
     }
 
     private void configureDropWizard(Configuration configuration, ApplicationContext applicationContext) {
