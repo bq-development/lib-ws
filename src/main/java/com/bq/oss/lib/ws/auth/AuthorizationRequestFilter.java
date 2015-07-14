@@ -1,6 +1,3 @@
-/*
- * Copyright (C) 2013 StarTIC
- */
 package com.bq.oss.lib.ws.auth;
 
 import static java.util.stream.StreamSupport.stream;
@@ -52,7 +49,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * This class is a bit of a hack to Dropwizard(Jersey 1.17). It uses the {@link io.dropwizard.auth.oauth.OAuthProvider} class to obtain an
+ * This class is a bit of a hack to Dropwizard(Jersey 2.17). It uses the {@link io.dropwizard.auth.oauth.OAuthFactory} class to obtain an
  * instance of {@link AuthorizationInfo}. The filter is configured to only verify the set of request whose path matches the specified
  * pattern. It validates only access rules of type <b>http_access</b>. If request cannot proceed, it returns a HTTP error 401 without any
  * error information.
@@ -184,7 +181,7 @@ import com.google.gson.JsonObject;
         return path.matches(input.get("uri").getAsString());
     }
 
-    // testing
+    // Testing purpose
     public HttpServletRequest getRequest() {
         return this.request;
     }
@@ -194,7 +191,6 @@ import com.google.gson.JsonObject;
         private final ContainerRequestContext requestContext;
 
         public CustomRequest(HttpServletRequest request, ContainerRequestContext requestContext) {
-            super();
             this.request = request;
             this.requestContext = requestContext;
         }

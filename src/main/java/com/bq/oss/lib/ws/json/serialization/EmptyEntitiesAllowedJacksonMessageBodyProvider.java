@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Priority;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import io.dropwizard.validation.ConstraintViolations;
 import io.dropwizard.validation.Validated;
 
+@Priority(1)
 public class EmptyEntitiesAllowedJacksonMessageBodyProvider extends JacksonJaxbJsonProvider {
 
 	private static final Class<?>[] DEFAULT_GROUP_ARRAY = new Class[] { Default.class };
