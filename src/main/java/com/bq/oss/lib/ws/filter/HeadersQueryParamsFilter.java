@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.bq.oss.lib.ws.api.error.ErrorResponseFactory;
@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Created by Francisco Sanchez on 29/10/14.
  */
-@Priority(Priorities.HEADER_DECORATOR) public class HeadersQueryParamsFilter extends OptionalContainerRequestFilter {
+@PreMatching @Priority(1) public class HeadersQueryParamsFilter extends OptionalContainerRequestFilter {
     private static final String HEADER_KEY = "headers";
     private final ObjectMapper objectMapper;
     private final TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
