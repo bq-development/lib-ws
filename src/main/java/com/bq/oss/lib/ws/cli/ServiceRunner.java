@@ -31,6 +31,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.util.ContextInitializer;
+import ch.qos.logback.core.joran.spi.JoranException;
+
 import com.bq.oss.lib.ws.SpringJerseyProvider;
 import com.bq.oss.lib.ws.api.error.GenericExceptionMapper;
 import com.bq.oss.lib.ws.api.error.JsonValidationExceptionMapper;
@@ -56,6 +60,8 @@ public abstract class ServiceRunner<T> {
         LOG.info("Initializing ${conf.namespace} as {}", getName());
         System.setProperty("conf.namespace", getName());
         application.run(arguments);
+        // rewrite dropwizard configuration in order to use a logback.xml file
+        resetLogConfig();
     }
 
     public void setCommandLine(CommandLineI commandLine) {
@@ -83,7 +89,8 @@ public abstract class ServiceRunner<T> {
 
     private void configureDefaultProviders(Environment environment) {
         environment.jersey().register(new GsonMessageReaderWriterProvider());
-        environment.jersey().register(new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
+        environment.jersey().register(
+                new EmptyEntitiesAllowedJacksonMessageBodyProvider(environment.getObjectMapper(), environment.getValidator()));
     }
 
     private void configureDropWizard(Configuration configuration, ApplicationContext applicationContext) {
@@ -167,5 +174,12 @@ public abstract class ServiceRunner<T> {
         public void setCommandLine(CommandLineI commandLine) {
             cliCommand.setCommandLine(commandLine);
         }
+    }
+
+    private void resetLogConfig() throws JoranException {
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        context.reset();
+        ContextInitializer initializer = new ContextInitializer(context);
+        initializer.autoConfig();
     }
 }
