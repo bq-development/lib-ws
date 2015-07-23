@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.bq.oss</groupId>
-		<artifactId>min-parent</artifactId>
-		<version>0.8.0</version>
-	</parent>
-	<groupId>com.bq.oss.lib</groupId>
+
+    <modelVersion>4.0.0</modelVersion>
+
+	<groupId>io.corbel.lib</groupId>
 	<artifactId>ws</artifactId>
 	<version>0.9.0-SNAPSHOT</version>
+
 	<name>ws</name>
+
 	<description>Library to create Java Web Services</description>
-	<url>https://github.com/bq/lib-ws</url>
+	<url>https://github.com/corbel-platform/lib-ws</url>
+
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -18,48 +18,58 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<organization>
 		<name>bq</name>
 		<url>http://www.bq.com/</url>
 	</organization>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <dropwizard.version>0.8.1</dropwizard.version>
+        <spring.version>4.1.7.RELEASE</spring.version>
+    </properties>
+
     <scm>
 		<connection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws</connection>
 		<developerConnection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws</developerConnection>
-		<url>https://github.com/bq/lib-ws</url>
+		<url>https://github.com/corbel-platform/lib-ws</url>
 		<tag>HEAD</tag>
 	</scm>
 
-	<properties>
-		<dropwizard.version>0.8.1</dropwizard.version>
-		<spring.version>4.1.7.RELEASE</spring.version>
-	</properties>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype</id>
+            <name>Sonatype Nexus snapshot repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.bq.oss.lib</groupId>
+			<groupId>io.corbel.lib</groupId>
 			<artifactId>config</artifactId>
-			<version>0.2.0</version>
+			<version>0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.bq.oss.lib</groupId>
+            <groupId>io.corbel.lib</groupId>
 			<artifactId>token</artifactId>
 			<version>0.7.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.bq.oss.lib</groupId>
+            <groupId>io.corbel.lib</groupId>
 			<artifactId>queries-api</artifactId>
 			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.bq.oss.lib</groupId>
+            <groupId>io.corbel.lib</groupId>
 			<artifactId>cli</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.bq.oss.lib</groupId>
+            <groupId>io.corbel.lib</groupId>
 			<artifactId>rabbitmq</artifactId>
-			<version>0.6.0</version>
+			<version>0.7.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>io.dropwizard</groupId>
@@ -136,7 +146,69 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.5.1</version>
 		</dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <version>2.0M10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.2.201409121644</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>3.0.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>sonatype</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 	<profiles>
 		<profile>
 			<id>release-sign-artifacts</id>
@@ -165,14 +237,17 @@
 			</build>
 		</profile>
 	</profiles>
+
 	<ciManagement>
 		<system>Travis CI</system>
-		<url>https://travis-ci.org/bq/lib-ws</url>
+		<url>https://travis-ci.org/corbel-platform/lib-ws</url>
 	</ciManagement>
+
 	<issueManagement>
-		<url>https://github.com/bq/lib-ws/issues</url>
+		<url>https://github.com/corbel-platform/lib-ws/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
+
 	<developers>
 		<developer>
 			<name>David Martínez</name>
