@@ -1,5 +1,7 @@
 package io.corbel.lib.ws.cli;
 
+import com.fasterxml.jackson.module.scala.DefaultScalaModule;
+import com.fasterxml.jackson.module.scala.ScalaModule;
 import io.corbel.lib.ws.SpringJerseyProvider;
 import io.corbel.lib.ws.api.error.URISyntaxExceptionMapper;
 import io.dropwizard.Application;
@@ -74,6 +76,7 @@ public abstract class ServiceRunner<T> {
     protected void bootstrap(Bootstrap<Configuration> bootstrap) {}
 
     protected void configureObjectMapper(ObjectMapper objectMapperFactory) {
+        objectMapperFactory.registerModule(new DefaultScalaModule());
         objectMapperFactory.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapperFactory.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
