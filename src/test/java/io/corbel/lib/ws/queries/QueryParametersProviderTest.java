@@ -5,20 +5,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-
-import io.corbel.lib.ws.annotation.Rest;
-import org.glassfish.jersey.server.ContainerRequest;
-import org.glassfish.jersey.server.ExtendedUriInfo;
-import org.glassfish.jersey.server.model.Parameter;
-import org.junit.Before;
-import org.junit.Test;
-
 import io.corbel.lib.queries.builder.QueryParametersBuilder;
 import io.corbel.lib.queries.builder.ResourceQueryBuilder;
 import io.corbel.lib.queries.jaxrs.QueryParameters;
@@ -33,6 +19,20 @@ import io.corbel.lib.queries.request.Count;
 import io.corbel.lib.queries.request.ResourceQuery;
 import io.corbel.lib.queries.request.Search;
 import io.corbel.lib.queries.request.Sort;
+import io.corbel.lib.ws.annotation.Rest;
+
+import java.util.Optional;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.glassfish.jersey.server.ContainerRequest;
+import org.glassfish.jersey.server.ExtendedUriInfo;
+import org.glassfish.jersey.server.model.Parameter;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -47,8 +47,7 @@ public class QueryParametersProviderTest {
     ContainerRequest request;
     QueryParametersProvider.QueryParametersFactory factory;
 
-    @Rest
-    public int restAnnotation;
+    @Rest public int restAnnotation;
 
     @Before
     public void setUp() throws Exception {
@@ -59,11 +58,12 @@ public class QueryParametersProviderTest {
                         mapper));
 
         QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, queryParametersBuilder);
-        QueryParametersProvider.QueryParametersFactoryProvider queryParametersFactoryProvider = new QueryParametersProvider.QueryParametersFactoryProvider(null,
-                null);
+        QueryParametersProvider.QueryParametersFactoryProvider queryParametersFactoryProvider = new QueryParametersProvider.QueryParametersFactoryProvider(
+                null, null);
         Parameter parameter = Parameter.create(null, null, false, QueryParameters.class, null, this.getClass().getField("restAnnotation")
                 .getAnnotations());
-        QueryParametersProvider.QueryParametersFactory createValueFactory = (QueryParametersProvider.QueryParametersFactory) queryParametersFactoryProvider.createValueFactory(parameter);
+        QueryParametersProvider.QueryParametersFactory createValueFactory = (QueryParametersProvider.QueryParametersFactory) queryParametersFactoryProvider
+                .createValueFactory(parameter);
         factory = spy(createValueFactory);
         request = mock(ContainerRequest.class);
         doReturn(request).when(factory).getContainerRequestBind();
@@ -79,7 +79,7 @@ public class QueryParametersProviderTest {
         params.add(QueryParametersProvider.API_SORT, "{\"price\":\"asc\"}");
         params.add(QueryParametersProvider.API_QUERY, "[{\"$eq\":{\"categories\":\"Metallica\"}}]");
         params.add(QueryParametersProvider.API_AGGREGATION, "{\"$count\":\"xxxx\"}");
-        params.add(QueryParametersProvider.API_SEARCH, "{\"text\":\"Title+Test+T1\"}");
+        params.add(QueryParametersProvider.API_SEARCH, "Title+Test+T1");
 
         ExtendedUriInfo uriInfoMock = mock(ExtendedUriInfo.class);
         when(uriInfoMock.getQueryParameters()).thenReturn(params);
@@ -94,7 +94,7 @@ public class QueryParametersProviderTest {
         assertThat(parameters.getSort()).isEqualTo(sort);
         Optional<ResourceQuery> resourceQuery = Optional.of(new ResourceQueryBuilder().add("categories", "Metallica").build());
         assertThat(parameters.getQuery()).isEqualTo(resourceQuery);
-        assertThat(parameters.getSearch()).isEqualTo(Optional.of(new Search("Title+Test+T1")));
+        assertThat(parameters.getSearch()).isEqualTo(Optional.of(new Search(false, "Title+Test+T1")));
     }
 
     @Test

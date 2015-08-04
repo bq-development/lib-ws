@@ -1,5 +1,14 @@
 package io.corbel.lib.ws.queries;
 
+import io.corbel.lib.queries.builder.QueryParametersBuilder;
+import io.corbel.lib.queries.exception.InvalidParameterException;
+import io.corbel.lib.queries.jaxrs.QueryParameters;
+import io.corbel.lib.ws.SpringJerseyProvider;
+import io.corbel.lib.ws.annotation.Rest;
+import io.corbel.lib.ws.api.error.ErrorMessage;
+import io.corbel.lib.ws.api.error.ErrorResponseFactory;
+import io.corbel.lib.ws.model.Error;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,9 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import io.corbel.lib.ws.SpringJerseyProvider;
-import io.corbel.lib.ws.api.error.ErrorMessage;
-import io.corbel.lib.ws.model.Error;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.InjectionResolver;
 import org.glassfish.hk2.api.ServiceLocator;
@@ -28,12 +34,6 @@ import org.glassfish.jersey.server.model.Parameter;
 import org.glassfish.jersey.server.model.Parameter.Source;
 import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
 
-import io.corbel.lib.queries.builder.QueryParametersBuilder;
-import io.corbel.lib.queries.exception.InvalidParameterException;
-import io.corbel.lib.queries.jaxrs.QueryParameters;
-import io.corbel.lib.ws.annotation.Rest;
-import io.corbel.lib.ws.api.error.ErrorResponseFactory;
-
 /**
  * @author Rubén Carrasco
  */
@@ -45,6 +45,7 @@ public class QueryParametersProvider implements SpringJerseyProvider {
     public static final String API_QUERY = "api:query";
     public static final String API_CONDITION = "api:condition";
     public static final String API_SEARCH = "api:search";
+    public static final String API_BINDED = "api:binded";
     public static final String API_AGGREGATION = "api:aggregation";
 
     private static int defaultPageSize;
@@ -86,7 +87,7 @@ public class QueryParametersProvider implements SpringJerseyProvider {
                 return queryParametersBuilder.createQueryParameters(getIntegerParam(params, API_PAGE).orElse(0),
                         getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize), maxPageSize, getStringParam(params, API_SORT),
                         getListStringParam(params, API_QUERY), getListStringParam(params, API_CONDITION),
-                        getStringParam(params, API_AGGREGATION), getStringParam(params, API_SEARCH));
+                        getStringParam(params, API_AGGREGATION), getStringParam(params, API_SEARCH), getBooleanParam(params, API_BINDED));
             } catch (InvalidParameterException e) {
                 throw toRequestException(e);
             } catch (IllegalArgumentException e) {
@@ -134,6 +135,10 @@ public class QueryParametersProvider implements SpringJerseyProvider {
 
         private Optional<String> getStringParam(MultivaluedMap<String, String> params, String key) {
             return params.containsKey(key) ? Optional.of(params.get(key).get(0)) : Optional.empty();
+        }
+
+        private boolean getBooleanParam(MultivaluedMap<String, String> params, String key) {
+            return params.containsKey(key) && Boolean.valueOf(params.get(key).get(0));
         }
 
         private Optional<List<String>> getListStringParam(MultivaluedMap<String, String> params, String key) {
