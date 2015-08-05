@@ -3,17 +3,15 @@ package io.corbel.lib.ws.dw.ioc;
 import java.util.Collections;
 import java.util.List;
 
-import io.corbel.lib.ws.filter.CharsetResponseFilter;
-import io.corbel.lib.ws.filter.NoRedirectResponseFilter;
-import io.corbel.lib.ws.filter.RequestIdFilter;
+import io.corbel.lib.token.ioc.TokenIoc;
+import io.corbel.lib.token.parser.TokenParser;
+import io.corbel.lib.ws.filter.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
-import io.corbel.lib.ws.filter.HeadersQueryParamsFilter;
-import io.corbel.lib.ws.filter.ProxyLocationResponseRewriteFilter;
-import io.corbel.lib.ws.filter.QueryParamsNotAllowedFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -36,6 +34,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     @Bean
     public ProxyLocationResponseRewriteFilter getProxyLocationResponseRewriteFilter() {
         return new ProxyLocationResponseRewriteFilter(env.getProperty("filter.proxyLocationResponseRewrite.enabled", Boolean.class, true));
+    }
+
+    @Bean
+    public AllowRequestWithoutDomainInUriFilter getAllowRequestWithoutDomainInUriFilter(TokenParser tokenParser) {
+        return new AllowRequestWithoutDomainInUriFilter(env.getProperty("filter.allowRequestWithoutDomainInUri.enabled", Boolean.class, false), tokenParser,
+                env.getProperty("auth.unAuthenticatedPath", String.class));
     }
 
     @Bean
