@@ -109,13 +109,8 @@ import com.google.gson.JsonObject;
     }
 
     public void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
-        Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(), new Predicate<JsonObject>() {
-            @Override
-            public boolean apply(JsonObject rule) {
-                return matchesMethod(request.getMethod(), rule) && matchesUriPath(request.getUriInfo().getPath(), rule)
-                        && matchesMediaTypes(request, rule) && matchesTokenType(info.getTokenReader().getInfo(), rule);
-            }
-        });
+        Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(), rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(request.getUriInfo().getPath(), rule)
+                && matchesMediaTypes(request, rule) && matchesTokenType(info.getTokenReader().getInfo(), rule));
 
         // if no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
