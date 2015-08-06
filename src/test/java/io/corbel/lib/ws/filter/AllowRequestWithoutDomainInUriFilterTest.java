@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -27,7 +28,7 @@ import org.mockito.Mockito;
  */
 public class AllowRequestWithoutDomainInUriFilterTest {
 
-    private final String unAuthenticatedPathPattern = "/v1.0/not_auth";
+    private final String unAuthenticatedPathPattern = "v1.0/not_auth";
 
     private static final String TOKEN = "token";
     private static final String DOMAIN = "test";
@@ -57,7 +58,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterWithoutDomain() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("/v1.0/test:Test", AUTHORIZATION_HEADER_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/resource:Test", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder).replacePath(Mockito.anyString());
         verify(uriBuilder).build();
@@ -66,7 +67,16 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterUriWithDomain() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("/v1.0/test/test:Test", AUTHORIZATION_HEADER_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/test/resource/test:Test", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterUriWithDifferentDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/different/resource/test:Test", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
         verify(uriBuilder, times(0)).build();
@@ -75,7 +85,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterUnAuthenticatedUri() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("/v1.0/not_auth", AUTHORIZATION_HEADER_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/not_auth", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
         verify(uriBuilder, times(0)).build();
@@ -84,7 +94,45 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterUriWithWrongToken() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("/v1.0/test/test:Test", AUTHORIZATION_HEADER_WRONG_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/test/resource/test:Test", AUTHORIZATION_HEADER_WRONG_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterUriWithoutToken() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/test/resource/test:Test", null);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterUriWithoutOptionMethodAndDomainAndToken() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:Test", null);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterUriWithoutDomainAndTokenWithOptionsMethod() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:Test", null);
+        when(request.getMethod()).thenReturn(HttpMethod.OPTIONS);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder).replacePath(Mockito.anyString());
+        verify(uriBuilder).build();
+        verify(request).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterUriWithoutTokenWithOptionsMethod() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/test/resource/test:Test", null);
+        when(request.getMethod()).thenReturn(HttpMethod.OPTIONS);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
         verify(uriBuilder, times(0)).build();
