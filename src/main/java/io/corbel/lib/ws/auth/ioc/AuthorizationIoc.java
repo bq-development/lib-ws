@@ -155,10 +155,9 @@ import com.google.gson.JsonObject;
     @Bean
     public ContainerRequestFilter getAuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> oauthProvider,
             CookieOAuthFactory<AuthorizationInfo> cookieOauthProvider, @Value("${auth.enabled}") boolean authEnabled,
-            @Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath,
-            @Value("${auth.checkDomain.enabled}") boolean checkDomainEnabled) {
+            @Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath) {
         if (authEnabled) {
-            return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, unAuthenticatedPath, checkDomainEnabled);
+            return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, unAuthenticatedPath);
         } else {
             LOG.warn("Authorization validation is disabled. The system runs in INSECURE mode");
             return emptyFilter();

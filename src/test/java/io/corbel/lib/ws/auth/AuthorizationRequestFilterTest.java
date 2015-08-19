@@ -36,11 +36,9 @@ public class AuthorizationRequestFilterTest {
 
     private static final String TEST_TOKEN = "test_token";
 
-    private static final String TEST_PATH = "v1.0/domain/test";
+    private static final String TEST_PATH = "v1.0/test";
 
     private static final String TEST_USER = "user";
-    private static final String TEST_DOMAIN = "domain";
-    private static final String TEST_ANOTHER_DOMAIN = "another";
     private static final String TEST_NOT_SECURIZED_PATH = "/not_secure_path";
 
     private CookieOAuthFactory<AuthorizationInfo> cookieProvider;
@@ -90,7 +88,6 @@ public class AuthorizationRequestFilterTest {
     public void testHttpAccessRule() {
         TokenReader tokenReader = mock(TokenReader.class);
         when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-        when(authorizationInfoMock.getDomainId()).thenReturn(TEST_DOMAIN);
         AuthorizationRequestFilter filter = stubFilter(".*");
         stubRequest(TEST_PATH, HttpMethod.GET);
         when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
@@ -104,7 +101,6 @@ public class AuthorizationRequestFilterTest {
     public void testHttpAccessRuleWithGenericMediaType() {
         TokenReader tokenReader = mock(TokenReader.class);
         when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-        when(authorizationInfoMock.getDomainId()).thenReturn(TEST_DOMAIN);
         AuthorizationRequestFilter filter = stubFilter(".*");
         stubRequest(TEST_PATH, HttpMethod.GET);
         when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.TEXT_HTML_TYPE, MediaType.APPLICATION_JSON_TYPE));
@@ -130,7 +126,6 @@ public class AuthorizationRequestFilterTest {
         when(tokenReader.getInfo()).thenReturn(tokenMock);
         when(tokenMock.getUserId()).thenReturn(TEST_USER);
         when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-        when(authorizationInfoMock.getDomainId()).thenReturn(TEST_DOMAIN);
         AuthorizationRequestFilter filter = stubFilter(".*");
         when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
         stubRequest(TEST_PATH, HttpMethod.GET);
@@ -147,7 +142,6 @@ public class AuthorizationRequestFilterTest {
         when(tokenReader.getInfo()).thenReturn(tokenMock);
         when(tokenMock.getUserId()).thenReturn(null);
         when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-        when(authorizationInfoMock.getDomainId()).thenReturn(TEST_DOMAIN);
         AuthorizationRequestFilter filter = stubFilter(TEST_NOT_SECURIZED_PATH);
         when(requestMock.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
         stubRequest(TEST_PATH, HttpMethod.GET);
@@ -161,7 +155,6 @@ public class AuthorizationRequestFilterTest {
     public void cookieTest() {
         TokenReader tokenReader = mock(TokenReader.class);
         when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-        when(authorizationInfoMock.getDomainId()).thenReturn(TEST_DOMAIN);
         AuthorizationRequestFilter filter = stubFilter("");
         stubRequest(TEST_PATH, HttpMethod.GET);
         when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
@@ -178,7 +171,6 @@ public class AuthorizationRequestFilterTest {
     public void badDomainTest() {
         TokenReader tokenReader = mock(TokenReader.class);
         when(authorizationInfoMock.getTokenReader()).thenReturn(tokenReader);
-        when(authorizationInfoMock.getDomainId()).thenReturn(TEST_ANOTHER_DOMAIN);
         AuthorizationRequestFilter filter = stubFilter("");
         stubRequest(TEST_PATH, HttpMethod.GET);
         when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
@@ -199,7 +191,7 @@ public class AuthorizationRequestFilterTest {
     }
 
     private AuthorizationRequestFilter stubFilter(String path) {
-        AuthorizationRequestFilter filter = spy(new AuthorizationRequestFilter(oAuthFactory, cookieProvider, path, true));
+        AuthorizationRequestFilter filter = spy(new AuthorizationRequestFilter(oAuthFactory, cookieProvider, path));
         doReturn(servletRequest).when(filter).getRequest();
         return filter;
     }

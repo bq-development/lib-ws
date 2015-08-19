@@ -66,23 +66,20 @@ import com.google.gson.JsonObject;
     private final OAuthFactory<AuthorizationInfo> oAuthProvider;
     private final CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider;
     private final String unAuthenticatedPathPattern;
-    private final boolean checkDomainEnabled;
 
     @Context private HttpServletRequest request;
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            String unAuthenticatedPathPattern, boolean checkDomainEnabled) {
+            String unAuthenticatedPathPattern) {
         this.oAuthProvider = provider;
         this.cookieOAuthProvider = cookieOAuthProvider;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
-        this.checkDomainEnabled = checkDomainEnabled;
     }
 
     public AuthorizationRequestFilter() {
         this.oAuthProvider = null;
         this.cookieOAuthProvider = null;
         this.unAuthenticatedPathPattern = null;
-        this.checkDomainEnabled = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -101,7 +98,6 @@ import com.google.gson.JsonObject;
                 }
 
                 if (info != null) {
-                    checkDomain(info, request);
                     checkAccessRules(info, request);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
@@ -109,17 +105,6 @@ import com.google.gson.JsonObject;
                 }
             }
         }
-    }
-
-    private void checkDomain(AuthorizationInfo info, ContainerRequestContext request) {
-        if(checkDomainEnabled && !info.getDomainId().equals(extractDomainFromRequest(request))) {
-            throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
-        }
-    }
-
-    private String extractDomainFromRequest(ContainerRequestContext request) {
-        //The array's second position contains url domain.
-        return request.getUriInfo().getPath().split("/")[1];
     }
 
     private void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
