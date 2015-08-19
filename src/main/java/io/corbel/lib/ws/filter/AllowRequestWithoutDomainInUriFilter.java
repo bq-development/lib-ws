@@ -22,8 +22,7 @@ import io.corbel.lib.token.reader.TokenReader;
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
 
-    private static final String API_VERSION = "v1.0/";
-    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile(API_VERSION + "\\w+/\\w+/\\w+:.+");
+    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/\\w+/\\w+/\\w+:.+");
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String UNAUTHENTICATED = "unauthenticated";
     private static final String TOKEN_PREFIX = "Bearer";
@@ -45,8 +44,9 @@ import io.corbel.lib.token.reader.TokenReader;
             if (!path.matches(unAuthenticatedPathPattern) && !REQUEST_WITH_DOMAIN_PATTERN.matcher(path).matches()) {
                 String domain = extractRequestDomain(request);
                 if (domain != null) {
-                    String versionAndDomainPath = API_VERSION + domain + "/";
-                    String pathWithoutVersion = path.replace(API_VERSION, EMPTY_STRING);
+                    String version = path.substring(0, path.indexOf("/"));
+                    String versionAndDomainPath = version + "/" + domain;
+                    String pathWithoutVersion = path.replace(version, EMPTY_STRING);
                     String pathWithDomain = versionAndDomainPath + pathWithoutVersion;
                     URI requestUriWithDomain = request.getUriInfo().getRequestUriBuilder().replacePath(pathWithDomain).build();
                     request.setRequestUri(requestUriWithDomain);

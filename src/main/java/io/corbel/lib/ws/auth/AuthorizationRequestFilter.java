@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import io.corbel.lib.token.TokenInfo;
 import io.corbel.lib.ws.api.error.ErrorResponseFactory;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -67,20 +66,23 @@ import com.google.gson.JsonObject;
     private final OAuthFactory<AuthorizationInfo> oAuthProvider;
     private final CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider;
     private final String unAuthenticatedPathPattern;
+    private final boolean checkDomainEnabled;
 
     @Context private HttpServletRequest request;
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            String unAuthenticatedPathPattern) {
+            String unAuthenticatedPathPattern, boolean checkDomainEnabled) {
         this.oAuthProvider = provider;
         this.cookieOAuthProvider = cookieOAuthProvider;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
+        this.checkDomainEnabled = checkDomainEnabled;
     }
 
     public AuthorizationRequestFilter() {
         this.oAuthProvider = null;
         this.cookieOAuthProvider = null;
         this.unAuthenticatedPathPattern = null;
+        this.checkDomainEnabled = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -99,6 +101,7 @@ import com.google.gson.JsonObject;
                 }
 
                 if (info != null) {
+                    checkDomain(info, request);
                     checkAccessRules(info, request);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
@@ -108,11 +111,21 @@ import com.google.gson.JsonObject;
         }
     }
 
-    public void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
+    private void checkDomain(AuthorizationInfo info, ContainerRequestContext request) {
+        if(checkDomainEnabled && !info.getDomainId().equals(extractDomainFromRequest(request))) {
+            throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
+        }
+    }
+
+    private String extractDomainFromRequest(ContainerRequestContext request) {
+        //The array's second position contains url domain.
+        return request.getUriInfo().getPath().split("/")[1];
+    }
+
+    private void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
         Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(), rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(request.getUriInfo().getPath(), rule)
                 && matchesMediaTypes(request, rule) && matchesTokenType(info.getTokenReader().getInfo(), rule));
-
-        // if no rules apply then by default access is denied
+        //If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
             throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
         }

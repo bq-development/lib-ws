@@ -12,7 +12,7 @@ import io.corbel.lib.ws.auth.AuthorizationRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Priority(Priorities.USER) public class RequestInformationRequestFilter implements ContainerRequestFilter {
+public class RequestInformationRequestFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestInformationRequestFilter.class);
 
