@@ -107,7 +107,7 @@ import com.google.gson.JsonObject;
         }
     }
 
-    private void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
+    public void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
         Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(), rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(request.getUriInfo().getPath(), rule)
                 && matchesMediaTypes(request, rule) && matchesTokenType(info.getTokenReader().getInfo(), rule));
         //If no rules apply then by default access is denied
