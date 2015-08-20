@@ -59,7 +59,7 @@
     <dependency>
       <groupId>io.corbel.lib</groupId>
       <artifactId>rabbitmq</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
+      <version>0.6.0</version>
     </dependency>
     <dependency>
       <groupId>io.dropwizard</groupId>
