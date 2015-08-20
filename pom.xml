@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.corbel.lib</groupId>
   <artifactId>ws</artifactId>
-  <version>0.9.0</version>
+  <version>0.10.0-SNAPSHOT</version>
   <name>ws</name>
   <description>Library to create Java Web Services</description>
   <url>https://github.com/corbel-platform/lib-ws</url>
@@ -26,7 +26,7 @@
     <connection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws</connection>
     <developerConnection>scm:git:ssh://bq-devtools@git.dev.bqsoftware.net:29418/lib-ws</developerConnection>
     <url>https://github.com/corbel-platform/lib-ws</url>
-    <tag>ws-0.9.0</tag>
+    <tag>HEAD</tag>
   </scm>
   <distributionManagement>
     <snapshotRepository>
