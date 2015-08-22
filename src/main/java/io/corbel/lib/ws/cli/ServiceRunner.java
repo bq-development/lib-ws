@@ -2,6 +2,7 @@ package io.corbel.lib.ws.cli;
 
 import io.corbel.lib.ws.SpringJerseyProvider;
 import io.corbel.lib.ws.api.error.URISyntaxExceptionMapper;
+import io.corbel.lib.ws.filter.ChunkedAwaredShallowEtagHeaderFilter;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.logging.LoggingFactory;
@@ -109,7 +110,7 @@ public abstract class ServiceRunner<T> {
 
         Boolean etagEnabled = applicationContext.getEnvironment().getProperty("etag.enabled", Boolean.class);
         if (etagEnabled == null || etagEnabled.equals(true)) {
-            environment.getApplicationContext().addFilter(ShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+            environment.getApplicationContext().addFilter(ChunkedAwaredShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
         }
 
         // Configure filters
