@@ -25,7 +25,7 @@ import io.corbel.lib.token.reader.TokenReader;
     private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/\\w+/\\w+/\\w+:.+");
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String UNAUTHENTICATED = "unauthenticated";
-    private static final String TOKEN_PREFIX = "Bearer";
+    private static final String TOKEN_PREFIX = "Bearer ";
     private static final String EMPTY_STRING = "";
 
     private final TokenParser tokenParser;
@@ -58,11 +58,9 @@ import io.corbel.lib.token.reader.TokenReader;
     }
 
     private String extractRequestDomain(ContainerRequestContext request) throws TokenVerificationException {
-        String domain = null;
+        String domain = UNAUTHENTICATED;
         String authorizationHeader = request.getHeaderString(AUTHORIZATION_HEADER);
-        if (authorizationHeader == null && HttpMethod.OPTIONS.equals(request.getMethod())) {
-            domain = UNAUTHENTICATED;
-        } else if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) {
+        if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) {
             TokenReader tokenReader = tokenParser.parseAndVerify(authorizationHeader.substring(TOKEN_PREFIX.length()));
             domain = tokenReader.getInfo().getDomainId();
         }

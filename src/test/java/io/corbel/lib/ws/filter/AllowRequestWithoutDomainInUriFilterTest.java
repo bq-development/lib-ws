@@ -111,15 +111,6 @@ public class AllowRequestWithoutDomainInUriFilterTest {
     }
 
     @Test
-    public void testFilterUriWithoutOptionMethodAndDomainAndToken() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:Test", null);
-        allowRequestWithoutDomainInUriFilter.filter(request);
-        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
-        verify(uriBuilder, times(0)).build();
-        verify(request, times(0)).setRequestUri(Mockito.any());
-    }
-
-    @Test
     public void testFilterUriWithoutDomainAndTokenWithOptionsMethod() throws URISyntaxException {
         ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:Test", null);
         when(request.getMethod()).thenReturn(HttpMethod.OPTIONS);
