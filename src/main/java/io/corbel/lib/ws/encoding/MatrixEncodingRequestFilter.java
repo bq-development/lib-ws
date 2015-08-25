@@ -29,7 +29,7 @@ public class MatrixEncodingRequestFilter implements ContainerRequestFilter {
      * 
      * @param matrixPattern A pattern according to the {@link java.util.regex.Pattern} class. This pattern must contain two groups. The
      *        first group the non placing part of the path and the second the replacing part. For example:
-     *        ^(/v1.0/resource/.+/.+/.+;r=)(.+)$
+     *        ^(/v1.0/.+/resource/.+/.+/.+;r=)(.+)$
      */
     public MatrixEncodingRequestFilter(String matrixPattern) {
         this.matrixPattern = Pattern.compile(matrixPattern);
