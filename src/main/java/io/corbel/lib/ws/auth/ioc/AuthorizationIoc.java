@@ -3,7 +3,7 @@ package io.corbel.lib.ws.auth.ioc;
 import io.corbel.lib.token.ioc.TokenIoc;
 import io.corbel.lib.token.parser.TokenParser;
 import io.corbel.lib.ws.auth.repository.RedisAuthorizationRulesRepository;
-import io.corbel.lib.ws.filter.RequestInformationRequestFilter;
+import io.corbel.lib.ws.filter.InformationRequestFilter;
 import io.corbel.lib.ws.health.AuthorizationRedisHealthCheck;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.UnauthorizedHandler;
@@ -170,8 +170,8 @@ import com.google.gson.JsonObject;
     }
 
     @Bean
-    public RequestInformationRequestFilter getRequestInformationRequestFilter() {
-        return new RequestInformationRequestFilter();
+    public InformationRequestFilter getRequestInformationRequestFilter() {
+        return new InformationRequestFilter();
     }
 
     private ContainerRequestFilter emptyFilter() {

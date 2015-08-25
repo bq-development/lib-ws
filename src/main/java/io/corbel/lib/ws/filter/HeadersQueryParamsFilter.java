@@ -10,6 +10,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
 
+import io.corbel.lib.ws.auth.priority.CorbelPriorities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,9 @@ import io.corbel.lib.ws.api.error.ErrorResponseFactory;
 /**
  * @author Francisco Sanchez
  */
-@PreMatching @Priority(1) public class HeadersQueryParamsFilter extends OptionalContainerRequestFilter {
+@PreMatching
+@Priority(CorbelPriorities.HEADERS_QUERY_PARAMS_FILTER)
+public class HeadersQueryParamsFilter extends OptionalContainerRequestFilter {
 
     private static final String HEADER_KEY = "headers";
     private final ObjectMapper objectMapper;

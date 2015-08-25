@@ -4,10 +4,10 @@ import java.net.URI;
 import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
 
+import io.corbel.lib.ws.auth.priority.CorbelPriorities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,9 @@ import io.corbel.lib.token.reader.TokenReader;
 /**
  * @author Alberto J. Rubio
  */
-@PreMatching @Priority(1) public class AllowRequestWithoutDomainInUriFilter extends OptionalContainerRequestFilter {
+@PreMatching
+@Priority(CorbelPriorities.ALLOW_REQUEST_WITHOUT_DOMAIN_IN_URI_FILTER)
+public class AllowRequestWithoutDomainInUriFilter extends OptionalContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
 

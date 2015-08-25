@@ -4,10 +4,12 @@ import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 
+import io.corbel.lib.ws.auth.priority.CorbelPriorities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @PreMatching
+@Priority(CorbelPriorities.MATRIX_ENCODING_REQUEST_FILTER)
 public class MatrixEncodingRequestFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(MatrixEncodingRequestFilter.class);

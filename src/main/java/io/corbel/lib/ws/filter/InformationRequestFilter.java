@@ -2,8 +2,6 @@ package io.corbel.lib.ws.filter;
 
 import java.io.IOException;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 
@@ -12,9 +10,9 @@ import io.corbel.lib.ws.auth.AuthorizationRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RequestInformationRequestFilter implements ContainerRequestFilter {
+public class InformationRequestFilter implements ContainerRequestFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RequestInformationRequestFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InformationRequestFilter.class);
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {

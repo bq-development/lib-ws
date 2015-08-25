@@ -39,7 +39,7 @@ public class ProxyLocationResponseRewriteFilter extends OptionalContainerRespons
     private void setLocationWithProxyPassPath(ContainerRequestContext request, ContainerResponseContext response, URI responseLocation,
             String originalUri) {
         if (responseLocation.getHost().equals(request.getUriInfo().getAbsolutePath().getHost())) {
-            String proxyPassPath = originalUri.substring(0, originalUri.indexOf(request.getUriInfo().getAbsolutePath().getPath()));
+            String proxyPassPath = originalUri.split("/v.*/")[0];
             try {
                 response.getHeaders().putSingle(
                         "Location",
