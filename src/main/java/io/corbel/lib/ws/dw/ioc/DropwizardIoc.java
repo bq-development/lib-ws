@@ -9,6 +9,7 @@ import io.dropwizard.logging.LoggingFactory;
 import io.dropwizard.logging.SyslogAppenderFactory;
 import io.dropwizard.server.DefaultServerFactory;
 
+import io.dropwizard.util.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,8 @@ import com.google.common.collect.ImmutableList;
         DefaultServerFactory configuration = new DefaultServerFactory();
         ((HttpConnectorFactory) configuration.getApplicationConnectors().get(0)).setPort(env.getProperty("dw.http.port", Integer.class,
                 8080));
+        ((HttpConnectorFactory) configuration.getApplicationConnectors().get(0)).setMaxRequestHeaderSize(Size.kilobytes(env
+                .getProperty("dw.http.maxRequestHeaderSize", Integer.class, 16)));
         ((HttpConnectorFactory) configuration.getAdminConnectors().get(0)).setPort(env
                 .getProperty("dw.http.adminPort", Integer.class, 8081));
         configuration.getRequestLogFactory().setAppenders(getLogConfiguration());
