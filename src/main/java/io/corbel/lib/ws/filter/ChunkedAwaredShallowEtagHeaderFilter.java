@@ -9,9 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * @author Alexander De Leon <alex.deleon@devialab.com>
- */
 public class ChunkedAwaredShallowEtagHeaderFilter extends ShallowEtagHeaderFilter {
 
     @Override
