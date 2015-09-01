@@ -110,7 +110,11 @@ public abstract class ServiceRunner<T> {
 
         Boolean etagEnabled = applicationContext.getEnvironment().getProperty("etag.enabled", Boolean.class);
         if (etagEnabled == null || etagEnabled.equals(true)) {
-            environment.getApplicationContext().addFilter(ChunkedAwaredShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+            if(applicationContext.getEnvironment().getProperty("etag.chunked.enabled", Boolean.class, false)) {
+                environment.getApplicationContext().addFilter(ChunkedAwaredShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+            } else {
+                environment.getApplicationContext().addFilter(ShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+            }
         }
 
         // Configure filters
