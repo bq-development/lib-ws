@@ -49,7 +49,7 @@
     <dependency>
       <groupId>io.corbel.lib</groupId>
       <artifactId>queries-api</artifactId>
-      <version>0.8.0</version>
+      <version>0.9.0</version>
     </dependency>
     <dependency>
       <groupId>io.corbel.lib</groupId>
