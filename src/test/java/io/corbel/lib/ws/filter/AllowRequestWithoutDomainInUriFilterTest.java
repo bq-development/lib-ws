@@ -1,22 +1,20 @@
 package io.corbel.lib.ws.filter;
 
-import static org.mockito.Mockito.*;
-
-import java.net.URISyntaxException;
+import io.corbel.lib.token.TokenInfo;
+import io.corbel.lib.token.exception.TokenVerificationException;
+import io.corbel.lib.token.parser.TokenParser;
+import io.corbel.lib.token.reader.TokenReader;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import java.net.URISyntaxException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import io.corbel.lib.token.TokenInfo;
-import io.corbel.lib.token.exception.TokenVerificationException;
-import io.corbel.lib.token.parser.TokenParser;
-import io.corbel.lib.token.reader.TokenReader;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Alberto J. Rubio
@@ -59,6 +57,16 @@ public class AllowRequestWithoutDomainInUriFilterTest {
         verify(uriBuilder).build();
         verify(request).setRequestUri(Mockito.any());
     }
+
+    @Test
+    public void testFilterWithoutDomainAndResourceUri() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:CoreJSObjectCrud1441298128357/id1441298128357", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder).replacePath(Mockito.anyString());
+        verify(uriBuilder).build();
+        verify(request).setRequestUri(Mockito.any());
+    }
+
 
     @Test
     public void testFilterUriWithDomain() throws URISyntaxException {

@@ -1,19 +1,17 @@
 package io.corbel.lib.ws.filter;
 
-import java.net.URI;
-import java.util.regex.Pattern;
-
-import javax.annotation.Priority;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.PreMatching;
-
+import io.corbel.lib.token.exception.TokenVerificationException;
+import io.corbel.lib.token.parser.TokenParser;
+import io.corbel.lib.token.reader.TokenReader;
 import io.corbel.lib.ws.auth.priority.CorbelPriorities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.corbel.lib.token.exception.TokenVerificationException;
-import io.corbel.lib.token.parser.TokenParser;
-import io.corbel.lib.token.reader.TokenReader;
+import javax.annotation.Priority;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.PreMatching;
+import java.net.URI;
+import java.util.regex.Pattern;
 
 /**
  * @author Alberto J. Rubio
@@ -23,8 +21,7 @@ import io.corbel.lib.token.reader.TokenReader;
 public class AllowRequestWithoutDomainInUriFilter extends OptionalContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
-
-    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/(\\w|-|.|:)+/\\w+/\\w+:.+");
+    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/[\\w-:.]+/\\w+/\\w+:.+");
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String UNAUTHENTICATED = "unauthenticated";
     private static final String TOKEN_PREFIX = "Bearer ";
