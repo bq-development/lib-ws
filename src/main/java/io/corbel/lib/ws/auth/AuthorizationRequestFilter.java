@@ -1,33 +1,17 @@
 package io.corbel.lib.ws.auth;
 
 import static java.util.stream.StreamSupport.stream;
-import io.dropwizard.auth.oauth.OAuthFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
@@ -40,12 +24,14 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.corbel.lib.token.TokenInfo;
-import io.corbel.lib.ws.api.error.ErrorResponseFactory;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import io.corbel.lib.token.TokenInfo;
+import io.corbel.lib.ws.api.error.ErrorResponseFactory;
+import io.dropwizard.auth.oauth.OAuthFactory;
 
 /**
  * This class is a bit of a hack to Dropwizard(Jersey 2.17). It uses the {@link io.dropwizard.auth.oauth.OAuthFactory} class to obtain an
@@ -62,24 +48,28 @@ import com.google.gson.JsonObject;
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
+    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/(\\w|-|.|:)+/\\w+/\\w+:.+");
 
     private final OAuthFactory<AuthorizationInfo> oAuthProvider;
     private final CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider;
     private final String unAuthenticatedPathPattern;
+    private final boolean checkDomain;
 
     @Context private HttpServletRequest request;
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            String unAuthenticatedPathPattern) {
+            String unAuthenticatedPathPattern, boolean checkDomain) {
         this.oAuthProvider = provider;
         this.cookieOAuthProvider = cookieOAuthProvider;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
+        this.checkDomain = checkDomain;
     }
 
     public AuthorizationRequestFilter() {
         this.oAuthProvider = null;
         this.cookieOAuthProvider = null;
         this.unAuthenticatedPathPattern = null;
+        this.checkDomain = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -98,7 +88,8 @@ import com.google.gson.JsonObject;
                 }
 
                 if (info != null) {
-                    checkAccessRules(info, request);
+                    String domainId = extractDomainId(info, request);
+                    checkAccessRules(info, request, domainId);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
                     throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
@@ -107,13 +98,31 @@ import com.google.gson.JsonObject;
         }
     }
 
-    public void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request) {
-        Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(), rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(request.getUriInfo().getPath(), rule)
-                && matchesMediaTypes(request, rule) && matchesTokenType(info.getTokenReader().getInfo(), rule));
-        //If no rules apply then by default access is denied
+    private String extractDomainId(AuthorizationInfo info, ContainerRequestContext request) {
+        if (checkDomain && REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
+            String domainId = request.getUriInfo().getPath().split("/")[1];
+            if (!info.getDomainId().equals(domainId)) {
+                throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
+            }
+            return domainId;
+        }
+        return null;
+    }
+
+    public void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request, String domainId) {
+        String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
+        Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(),
+                rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(scopeUrl, rule) && matchesMediaTypes(request, rule)
+                        && matchesTokenType(info.getTokenReader().getInfo(), rule));
+        // If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
             throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
         }
+    }
+
+    private String extractScopeUrl(String domainId, String path) {
+        if (domainId != null) path = path.replace(domainId + "/", "");
+        return path.substring(path.indexOf("/") + 1);
     }
 
     private void storeAuthorizationInfoInRequestProperties(AuthorizationInfo info, ContainerRequestContext request) {
@@ -156,10 +165,10 @@ import com.google.gson.JsonObject;
         JsonArray mediaTypesArray = input.get("mediaTypes").getAsJsonArray();
 
         for (MediaType mediaType : request.getAcceptableMediaTypes()) {
-            if (stream(mediaTypesArray.spliterator(), true).map(
-                    mediatypeJsonElement -> MediaType.valueOf(mediatypeJsonElement.getAsString())).anyMatch(ruleMediaType -> {
-                return mediaType.isCompatible(ruleMediaType);
-            })) {
+            if (stream(mediaTypesArray.spliterator(), true)
+                    .map(mediatypeJsonElement -> MediaType.valueOf(mediatypeJsonElement.getAsString())).anyMatch(ruleMediaType -> {
+                        return mediaType.isCompatible(ruleMediaType);
+                    })) {
                 return true;
             }
         }
