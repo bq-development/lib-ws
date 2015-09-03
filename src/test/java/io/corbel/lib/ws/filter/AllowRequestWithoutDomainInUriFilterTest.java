@@ -1,27 +1,22 @@
 package io.corbel.lib.ws.filter;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import io.corbel.lib.token.TokenInfo;
 import io.corbel.lib.token.exception.TokenVerificationException;
 import io.corbel.lib.token.parser.TokenParser;
 import io.corbel.lib.token.reader.TokenReader;
-import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 /**
  * @author Alberto J. Rubio
@@ -67,7 +62,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterUriWithDomain() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("v1.0/test/resource/test:Test", AUTHORIZATION_HEADER_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/test-qa/resource/test:Test", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
         verify(uriBuilder, times(0)).build();
