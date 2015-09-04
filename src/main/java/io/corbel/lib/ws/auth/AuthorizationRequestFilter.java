@@ -47,7 +47,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
 
-    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/[a-zA-Z_0-9-:\\.]+/\\w+/\\w+:.+");
+    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9.]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
 
     private final OAuthFactory<AuthorizationInfo> oAuthProvider;
