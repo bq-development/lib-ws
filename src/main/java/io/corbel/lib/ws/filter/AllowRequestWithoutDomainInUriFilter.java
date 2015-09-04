@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class AllowRequestWithoutDomainInUriFilter extends OptionalContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
-    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/[\\w-:.]+/\\w+/\\w+:.+");
+    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v.*/[a-zA-Z_0-9-:\\.]+/\\w+/\\w+:.+");
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String UNAUTHENTICATED = "unauthenticated";
     private static final String TOKEN_PREFIX = "Bearer ";

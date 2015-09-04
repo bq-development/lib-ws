@@ -51,7 +51,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterWithoutDomain() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("v1.0/resource:Test", AUTHORIZATION_HEADER_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:Test", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder).replacePath(Mockito.anyString());
         verify(uriBuilder).build();
@@ -60,7 +60,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     @Test
     public void testFilterWithoutDomainAndResourceUri() throws URISyntaxException {
-        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:CoreJSObjectCrud1441298128357/id1441298128357", AUTHORIZATION_HEADER_VALUE);
+        ContainerRequestContext request = setupContainerRequest("v1.0/resource/test:Collection/id", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder).replacePath(Mockito.anyString());
         verify(uriBuilder).build();
