@@ -1,14 +1,5 @@
 package io.corbel.lib.ws.auth.ioc;
 
-import io.corbel.lib.token.ioc.TokenIoc;
-import io.corbel.lib.token.parser.TokenParser;
-import io.corbel.lib.ws.auth.repository.RedisAuthorizationRulesRepository;
-import io.corbel.lib.ws.filter.InformationRequestFilter;
-import io.corbel.lib.ws.health.AuthorizationRedisHealthCheck;
-import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.UnauthorizedHandler;
-import io.dropwizard.auth.oauth.OAuthFactory;
-
 import javax.ws.rs.container.ContainerRequestFilter;
 
 import org.slf4j.Logger;
@@ -23,17 +14,19 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import redis.clients.jedis.JedisPoolConfig;
 
-import io.corbel.lib.ws.auth.AuthorizationInfo;
-import io.corbel.lib.ws.auth.AuthorizationInfoProvider;
-import io.corbel.lib.ws.auth.AuthorizationRequestFilter;
-import io.corbel.lib.ws.auth.AuthorizationRulesService;
-import io.corbel.lib.ws.auth.BearerTokenAuthenticator;
-import io.corbel.lib.ws.auth.CookieOAuthFactory;
-import io.corbel.lib.ws.auth.DefaultAuthorizationRulesService;
-import io.corbel.lib.ws.auth.JsonUnauthorizedHandler;
-import io.corbel.lib.ws.auth.repository.AuthorizationRulesRepository;
-import io.corbel.lib.ws.redis.GsonRedisSerializer;
 import com.google.gson.JsonObject;
+
+import io.corbel.lib.token.ioc.TokenIoc;
+import io.corbel.lib.token.parser.TokenParser;
+import io.corbel.lib.ws.auth.*;
+import io.corbel.lib.ws.auth.repository.AuthorizationRulesRepository;
+import io.corbel.lib.ws.auth.repository.RedisAuthorizationRulesRepository;
+import io.corbel.lib.ws.filter.InformationResponseFilter;
+import io.corbel.lib.ws.health.AuthorizationRedisHealthCheck;
+import io.corbel.lib.ws.redis.GsonRedisSerializer;
+import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.UnauthorizedHandler;
+import io.dropwizard.auth.oauth.OAuthFactory;
 
 /**
  * @author Alexander De Leon
@@ -171,8 +164,8 @@ import com.google.gson.JsonObject;
     }
 
     @Bean
-    public InformationRequestFilter getRequestInformationRequestFilter() {
-        return new InformationRequestFilter();
+    public InformationResponseFilter getRequestInformationRequestFilter() {
+        return new InformationResponseFilter();
     }
 
     private ContainerRequestFilter emptyFilter() {
