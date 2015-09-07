@@ -19,14 +19,22 @@ public class InformationResponseFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext)
             throws IOException {
+        String authorizationMsg = getAuthorizationLog(containerRequestContext);
+        LOG.info("Request {} {} {} result: {}, location: {}, length: {} {}",
+                    containerRequestContext.getMethod(), containerRequestContext.getUriInfo().getAbsolutePath(),
+                    containerRequestContext.getMediaType(), containerResponseContext.getStatus(), containerResponseContext.getLocation(),
+                    containerResponseContext.getLength(),authorizationMsg);
+    }
+
+    private String getAuthorizationLog(ContainerRequestContext containerRequestContext) {
         Object property = containerRequestContext.getProperty(AuthorizationRequestFilter.AUTHORIZATION_INFO_PROPERTIES_KEY);
         if (property != null) {
             AuthorizationInfo authorizationInfo = (AuthorizationInfo) property;
-            LOG.info("Request to {} {} {} result: {}, location: {}, length: {}, from domain: {}, client: {}, user: {}",
-                    containerRequestContext.getMethod(), containerRequestContext.getUriInfo().getAbsolutePath(),
-                    containerRequestContext.getMediaType(), containerResponseContext.getStatus(), containerResponseContext.getLocation(),
-                    containerResponseContext.getLength(), authorizationInfo.getDomainId(), authorizationInfo.getClientId(),
-                    authorizationInfo.getUserId());
+            return ", from domain: " + authorizationInfo.getDomainId() +
+                    ", client: " + authorizationInfo.getClientId() +
+                    ", user: " +authorizationInfo.getUserId();
+        } else {
+            return "";
         }
     }
 
