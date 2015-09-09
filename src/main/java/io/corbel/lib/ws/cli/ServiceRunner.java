@@ -25,6 +25,7 @@ import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.message.DeflateEncoder;
 import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ServerProperties;
+import org.glassfish.jersey.server.filter.HttpMethodOverrideFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -118,6 +119,11 @@ public abstract class ServiceRunner<T> {
         }
 
         // Configure filters
+        Boolean httpMethodOverrideEnabled = applicationContext.getEnvironment().getProperty("filter.httpTunnelingFilter.enabled", Boolean.class, false);
+        if (httpMethodOverrideEnabled) {
+            environment.jersey().register(HttpMethodOverrideFilter.class);
+        }
+
         List<OptionalContainerRequestFilter> disabledRequestFilters = new ArrayList<>(applicationContext.getBeansOfType(
                 OptionalContainerRequestFilter.class).values()).stream().filter(filter -> !filter.isEnabled()).collect(Collectors.toList());
 
