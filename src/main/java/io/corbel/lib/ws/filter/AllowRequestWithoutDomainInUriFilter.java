@@ -4,21 +4,22 @@ import io.corbel.lib.token.exception.TokenVerificationException;
 import io.corbel.lib.token.parser.TokenParser;
 import io.corbel.lib.token.reader.TokenReader;
 import io.corbel.lib.ws.auth.priority.CorbelPriorities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
-import java.net.URI;
-import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Alberto J. Rubio
  */
-@PreMatching
-@Priority(CorbelPriorities.ALLOW_REQUEST_WITHOUT_DOMAIN_IN_URI_FILTER)
-public class AllowRequestWithoutDomainInUriFilter extends OptionalContainerRequestFilter {
+@PreMatching @Priority(CorbelPriorities.ALLOW_REQUEST_WITHOUT_DOMAIN_IN_URI_FILTER) public class AllowRequestWithoutDomainInUriFilter
+        extends OptionalContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
     private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
@@ -42,8 +43,9 @@ public class AllowRequestWithoutDomainInUriFilter extends OptionalContainerReque
             String path = request.getUriInfo().getPath();
             if (!path.matches(unAuthenticatedPathPattern) && !REQUEST_WITH_DOMAIN_PATTERN.matcher(path).matches()) {
                 String domain = extractRequestDomain(request);
-                if (domain != null) {
-                    String version = path.substring(0, path.indexOf("/"));
+                int slashIndex = path.indexOf("/");
+                if (domain != null && slashIndex != -1) {
+                    String version = path.substring(0, slashIndex);
                     String versionAndDomainPath = version + "/" + domain;
                     String pathWithoutVersion = path.replace(version, EMPTY_STRING);
                     String pathWithDomain = versionAndDomainPath + pathWithoutVersion;
