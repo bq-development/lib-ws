@@ -3,16 +3,15 @@ package io.corbel.lib.ws.dw.ioc;
 import java.util.Collections;
 import java.util.List;
 
-import io.corbel.lib.token.ioc.TokenIoc;
-import io.corbel.lib.token.parser.TokenParser;
-import io.corbel.lib.ws.filter.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.corbel.lib.token.parser.TokenParser;
+import io.corbel.lib.ws.filter.*;
 
 /**
  * Created by Alberto J. Rubio
@@ -51,6 +50,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     public QueryParamsNotAllowedFilter getStrictQueryParamsFilter() {
         return new QueryParamsNotAllowedFilter(env.getProperty("filter.queryParamsNotAllowedFilter.enabled", Boolean.class, false),
                 env.getProperty("filter.queryParamsNotAllowedFilter.methods", List.class, Collections.emptyList()));
+    }
+
+    @Bean
+    public OptionalHttpTunnelingFilter getOptionalHttpTunnelingFilter() {
+        return new OptionalHttpTunnelingFilter(env.getProperty("filter.httpTunnelingFilter.enabled", Boolean.class, false));
     }
 
     @Bean
