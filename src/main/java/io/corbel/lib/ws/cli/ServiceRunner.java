@@ -119,7 +119,7 @@ public abstract class ServiceRunner<T> {
         }
 
         // Configure filters
-        Boolean httpMethodOverrideEnabled = applicationContext.getEnvironment().getProperty("filter.httpTunnelingFilter.enabled", Boolean.class, false);
+        Boolean httpMethodOverrideEnabled = applicationContext.getEnvironment().getProperty("filter.httpTunnelingFilter.enabled", Boolean.class, true);
         if (httpMethodOverrideEnabled) {
             environment.jersey().register(HttpMethodOverrideFilter.class);
         }
