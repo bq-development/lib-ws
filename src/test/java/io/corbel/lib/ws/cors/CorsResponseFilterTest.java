@@ -1,8 +1,8 @@
 package io.corbel.lib.ws.cors;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.corbel.lib.ws.model.CustomHeaders;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -10,10 +10,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import io.corbel.lib.ws.model.CustomHeaders;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Alexander De Leon
@@ -79,7 +78,7 @@ public class CorsResponseFilterTest {
         assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
         assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
         assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
-        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
+        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER);
     }
 
     @Test
@@ -106,6 +105,6 @@ public class CorsResponseFilterTest {
         assertThat(allowedHeaders).contains(HttpHeaders.AUTHORIZATION);
         assertThat(allowedHeaders).contains(HttpHeaders.ACCEPT);
         assertThat(allowedHeaders).contains(HttpHeaders.CONTENT_TYPE);
-        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER.toString());
+        assertThat(allowedHeaders).contains(CustomHeaders.NO_REDIRECT_HEADER);
     }
 }
