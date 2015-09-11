@@ -15,7 +15,7 @@ public class NoRedirectResponseFilter extends OptionalContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
         if (FilterUtil.redirect(response.getStatus()) && FilterUtil.hasNoRedirectHeader(request)) {
-            response.setStatus(Response.Status.NO_CONTENT.getStatusCode());
+            response.setStatus(Response.Status.OK.getStatusCode());
         }
     }
 
