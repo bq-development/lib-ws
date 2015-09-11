@@ -1,17 +1,16 @@
 package io.corbel.lib.ws.cors;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.google.common.base.Joiner;
+import com.google.common.net.HttpHeaders;
+import io.corbel.lib.ws.model.CustomHeaders;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-
-import io.corbel.lib.ws.model.CustomHeaders;
-import com.google.common.base.Joiner;
-import com.google.common.net.HttpHeaders;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This filter permits different configurations for the CORS behaviour.
@@ -56,7 +55,7 @@ public class CorsResponseFilter implements ContainerResponseFilter {
                 response.getHeaders().add(
                         HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
                         Joiner.on(",").join(HttpHeaders.AUTHORIZATION, HttpHeaders.ACCEPT, HttpHeaders.CONTENT_TYPE,
-                                CustomHeaders.NO_REDIRECT_HEADER.toString(), CustomHeaders.REQUEST_COOKIE_HEADER.toString()));
+                                CustomHeaders.NO_REDIRECT_HEADER, CustomHeaders.REQUEST_COOKIE_HEADER));
                 response.getHeaders().add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                         Joiner.on(",").join(HttpHeaders.LOCATION, HttpHeaders.DATE));
                 if (response.getHeaders().containsKey(HttpHeaders.ALLOW)) {
