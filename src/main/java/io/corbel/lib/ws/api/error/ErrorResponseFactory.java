@@ -83,9 +83,13 @@ public class ErrorResponseFactory {
 		return unauthorized(new Error("unauthorized", message));
 	}
 
+    public Response unauthorized(String error, String errorDescription){
+        return unauthorized(new Error(error, errorDescription));
+    }
+
 	public Response preconditionFailed(String description) {
 		return jsonResponse(new Error("precondition_failed", ErrorMessage.PRECONDITION_FAILED.getMessage(description)),
-				Status.PRECONDITION_FAILED);
+                Status.PRECONDITION_FAILED);
 	}
 
 	public Response forbidden() {
