@@ -1,23 +1,18 @@
 package io.corbel.lib.ws.dw.ioc;
 
+import ch.qos.logback.classic.Level;
+import com.google.common.collect.ImmutableList;
 import io.dropwizard.jetty.GzipFilterFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
-import io.dropwizard.logging.AppenderFactory;
-import io.dropwizard.logging.ConsoleAppenderFactory;
-import io.dropwizard.logging.FileAppenderFactory;
-import io.dropwizard.logging.LoggingFactory;
-import io.dropwizard.logging.SyslogAppenderFactory;
+import io.dropwizard.logging.*;
 import io.dropwizard.server.DefaultServerFactory;
 import io.dropwizard.util.Size;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import ch.qos.logback.classic.Level;
-
-import com.google.common.collect.ImmutableList;
+import java.util.Optional;
 
 /**
  * @author Alexander De Leon
@@ -66,7 +61,7 @@ import com.google.common.collect.ImmutableList;
     }
 
     private void getSyslogConfiguration(ImmutableList.Builder<AppenderFactory> appenders) {
-        if (env.getProperty("dw.logging.syslog.enabled", Boolean.class, true)) {
+        if (env.getProperty("dw.logging.syslog.enabled", Boolean.class, true) && !isConsoleMode()) {
             SyslogAppenderFactory configuration = new SyslogAppenderFactory();
             configuration.setThreshold(getLogLevel("dw.logging.syslog.threshold", "ALL"));
             appenders.add(configuration);
@@ -74,7 +69,7 @@ import com.google.common.collect.ImmutableList;
     }
 
     private void getFileConfiguration(ImmutableList.Builder<AppenderFactory> appenders) {
-        if (env.getProperty("dw.logging.file.enabled", Boolean.class, false)) {
+        if (env.getProperty("dw.logging.file.enabled", Boolean.class, false) && !isConsoleMode()) {
             FileAppenderFactory configuration = new FileAppenderFactory();
             configuration.setThreshold(getLogLevel("dw.logging.file.threshold", "ALL"));
             configuration.setCurrentLogFilename(env.getProperty("dw.logging.file.currentLogFilename", "./logs/app.log"));
@@ -93,6 +88,10 @@ import com.google.common.collect.ImmutableList;
     private Level getLogLevel(String property, String def) {
         String level = env.getProperty(property, def);
         return Level.toLevel(level);
+    }
+
+    private boolean isConsoleMode() {
+        return Optional.ofNullable(System.getProperty("mode")).map(mode -> mode.equals("console")).orElse(false);
     }
 
 }
