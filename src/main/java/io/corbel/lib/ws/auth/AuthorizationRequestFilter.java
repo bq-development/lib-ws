@@ -19,6 +19,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
@@ -42,10 +43,13 @@ import io.dropwizard.auth.oauth.OAuthFactory;
  * @author Alexander De Leon
  * 
  */
-
 @Priority(Priorities.AUTHORIZATION) public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
+
+    private static final String INVALID_TOKEN_CODE = "invalid_token";
+    private static final String UNAUTHORIZED_TOKEN_CODE = "unauthorized_token";
+    private static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
 
     private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
@@ -92,7 +96,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                     checkAccessRules(info, request, domainId);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
-                    throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
+                    throw new WebApplicationException(generateUnAuthorizedResponse(INVALID_TOKEN_CODE));
                 }
             }
         }
@@ -102,7 +106,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         if (checkDomain && REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
             String domainId = request.getUriInfo().getPath().split("/")[1];
             if (!info.getDomainId().equals(domainId)) {
-                throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
+                throw new WebApplicationException(generateUnAuthorizedResponse(UNAUTHORIZED_TOKEN_CODE));
             }
             return domainId;
         }
@@ -116,12 +120,17 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                         && matchesTokenType(info.getTokenReader().getInfo(), rule));
         // If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
-            throw new WebApplicationException(ErrorResponseFactory.getInstance().unauthorized());
+            throw new WebApplicationException(generateUnAuthorizedResponse(UNAUTHORIZED_TOKEN_CODE));
         }
     }
 
+    private Response generateUnAuthorizedResponse(String code) {
+        return ErrorResponseFactory.getInstance().unauthorized(code, UNAUTHORIZED_MESSAGE);
+    }
+
     private String extractScopeUrl(String domainId, String path) {
-        if (domainId != null) path = path.replace(domainId + "/", "");
+        if (domainId != null)
+            path = path.replace(domainId + "/", "");
         return path.substring(path.indexOf("/") + 1);
     }
 
@@ -166,9 +175,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
 
         for (MediaType mediaType : request.getAcceptableMediaTypes()) {
             if (stream(mediaTypesArray.spliterator(), true)
-                    .map(mediatypeJsonElement -> MediaType.valueOf(mediatypeJsonElement.getAsString())).anyMatch(ruleMediaType -> {
-                        return mediaType.isCompatible(ruleMediaType);
-                    })) {
+                    .map(mediaTypeElement -> MediaType.valueOf(mediaTypeElement.getAsString())).anyMatch(mediaType::isCompatible)) {
                 return true;
             }
         }
