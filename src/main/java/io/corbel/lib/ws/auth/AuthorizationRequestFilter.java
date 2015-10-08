@@ -47,9 +47,6 @@ import io.dropwizard.auth.oauth.OAuthFactory;
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
 
-    private static final Response UNAUTHORIZED_TOKEN_RESPONSE = ErrorResponseFactory.getInstance().unauthorized("unauthorized_token", "The Authorization token can not perform the request");
-    private static final Response INVALID_TOKEN_RESPONSE = ErrorResponseFactory.getInstance().unauthorized("invalid_token", "The Authorization token is invalid");
-
     private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
 
@@ -95,7 +92,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                     checkAccessRules(info, request, domainId);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
-                    throw new WebApplicationException(INVALID_TOKEN_RESPONSE);
+                    throw new WebApplicationException(generateInvalidTokenResponse());
                 }
             }
         }
@@ -105,7 +102,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         if (checkDomain && REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
             String domainId = request.getUriInfo().getPath().split("/")[1];
             if (!info.getDomainId().equals(domainId)) {
-                throw new WebApplicationException(UNAUTHORIZED_TOKEN_RESPONSE);
+                throw new WebApplicationException(generateUnauthorizedTokenResponse());
             }
             return domainId;
         }
@@ -119,8 +116,16 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                         && matchesTokenType(info.getTokenReader().getInfo(), rule));
         // If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
-            throw new WebApplicationException(UNAUTHORIZED_TOKEN_RESPONSE);
+            throw new WebApplicationException(generateUnauthorizedTokenResponse());
         }
+    }
+
+    private Response generateInvalidTokenResponse() {
+        return ErrorResponseFactory.getInstance().unauthorized("invalid_token", "The Authorization token is invalid");
+    }
+
+    private Response generateUnauthorizedTokenResponse() {
+        return ErrorResponseFactory.getInstance().unauthorized("unauthorized_token", "The Authorization token can not perform the request");
     }
 
     private String extractScopeUrl(String domainId, String path) {
