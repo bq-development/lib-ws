@@ -121,11 +121,11 @@ import io.dropwizard.auth.oauth.OAuthFactory;
     }
 
     private Response generateInvalidTokenResponse() {
-        return ErrorResponseFactory.getInstance().unauthorized("invalid_token", "The Authorization token is invalid");
+        return ErrorResponseFactory.getInstance().unauthorized("invalid_token", "The authorization token is invalid");
     }
 
     private Response generateUnauthorizedTokenResponse() {
-        return ErrorResponseFactory.getInstance().unauthorized("unauthorized_token", "The Authorization token can not perform the request");
+        return ErrorResponseFactory.getInstance().unauthorized("unauthorized_token", "The authorization token can not perform the request");
     }
 
     private String extractScopeUrl(String domainId, String path) {
