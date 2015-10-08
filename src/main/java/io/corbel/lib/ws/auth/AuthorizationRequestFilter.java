@@ -47,9 +47,8 @@ import io.dropwizard.auth.oauth.OAuthFactory;
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
 
-    private static final String INVALID_TOKEN_CODE = "invalid_token";
-    private static final String UNAUTHORIZED_TOKEN_CODE = "unauthorized_token";
-    private static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
+    private static final Response UNAUTHORIZED_TOKEN_RESPONSE = ErrorResponseFactory.getInstance().unauthorized("unauthorized_token", "The Authorization token can not perform the request");
+    private static final Response INVALID_TOKEN_RESPONSE = ErrorResponseFactory.getInstance().unauthorized("invalid_token", "The Authorization token is invalid");
 
     private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
@@ -96,7 +95,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                     checkAccessRules(info, request, domainId);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
-                    throw new WebApplicationException(generateUnAuthorizedResponse(INVALID_TOKEN_CODE));
+                    throw new WebApplicationException(INVALID_TOKEN_RESPONSE);
                 }
             }
         }
@@ -106,7 +105,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         if (checkDomain && REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
             String domainId = request.getUriInfo().getPath().split("/")[1];
             if (!info.getDomainId().equals(domainId)) {
-                throw new WebApplicationException(generateUnAuthorizedResponse(UNAUTHORIZED_TOKEN_CODE));
+                throw new WebApplicationException(UNAUTHORIZED_TOKEN_RESPONSE);
             }
             return domainId;
         }
@@ -120,12 +119,8 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                         && matchesTokenType(info.getTokenReader().getInfo(), rule));
         // If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
-            throw new WebApplicationException(generateUnAuthorizedResponse(UNAUTHORIZED_TOKEN_CODE));
+            throw new WebApplicationException(UNAUTHORIZED_TOKEN_RESPONSE);
         }
-    }
-
-    private Response generateUnAuthorizedResponse(String code) {
-        return ErrorResponseFactory.getInstance().unauthorized(code, UNAUTHORIZED_MESSAGE);
     }
 
     private String extractScopeUrl(String domainId, String path) {
@@ -551,7 +546,5 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
             return request.upgrade(handlerClass);
         }
-
     }
-
 }
