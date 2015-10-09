@@ -55,7 +55,8 @@ public class CorsResponseFilter implements ContainerResponseFilter {
                 response.getHeaders().add(
                         HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
                         Joiner.on(",").join(HttpHeaders.AUTHORIZATION, HttpHeaders.ACCEPT, HttpHeaders.CONTENT_TYPE,
-                                CustomHeaders.NO_REDIRECT_HEADER, CustomHeaders.REQUEST_COOKIE_HEADER, CustomHeaders.X_HTTP_METHOD_OVERRIDE));
+                                CustomHeaders.NO_REDIRECT_HEADER, CustomHeaders.REQUEST_COOKIE_HEADER, CustomHeaders.X_HTTP_METHOD_OVERRIDE,
+                                CustomHeaders.X_CHALLENGE));
                 response.getHeaders().add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                         Joiner.on(",").join(HttpHeaders.LOCATION, HttpHeaders.DATE));
                 if (response.getHeaders().containsKey(HttpHeaders.ALLOW)) {
