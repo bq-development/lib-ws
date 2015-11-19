@@ -30,7 +30,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import io.corbel.lib.token.TokenInfo;
 import io.corbel.lib.ws.api.error.ErrorResponseFactory;
 import io.dropwizard.auth.oauth.OAuthFactory;
 
@@ -52,22 +51,30 @@ import io.dropwizard.auth.oauth.OAuthFactory;
 
     private final OAuthFactory<AuthorizationInfo> oAuthProvider;
     private final CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider;
+    private final PublicAccessService publicAccessService;
     private final String unAuthenticatedPathPattern;
     private final boolean checkDomain;
 
     @Context private HttpServletRequest request;
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            String unAuthenticatedPathPattern, boolean checkDomain) {
+            PublicAccessService publicAccessService, String unAuthenticatedPathPattern, boolean checkDomain) {
         this.oAuthProvider = provider;
         this.cookieOAuthProvider = cookieOAuthProvider;
+        this.publicAccessService = publicAccessService;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
         this.checkDomain = checkDomain;
+    }
+
+    public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
+                                      String unAuthenticatedPathPattern, boolean checkDomain) {
+        this(provider, cookieOAuthProvider, null, unAuthenticatedPathPattern, checkDomain);
     }
 
     public AuthorizationRequestFilter() {
         this.oAuthProvider = null;
         this.cookieOAuthProvider = null;
+        publicAccessService = null;
         this.unAuthenticatedPathPattern = null;
         this.checkDomain = false;
     }
@@ -78,7 +85,6 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         if (!request.getUriInfo().getPath().matches(unAuthenticatedPathPattern)) {
             // OPTIONS is always allowed (for CORS)
             if (!request.getMethod().equals(HttpMethod.OPTIONS)) {
-
                 CustomRequest customRequest = new CustomRequest(getRequest(), request);
                 oAuthProvider.setRequest(customRequest);
                 AuthorizationInfo info = oAuthProvider.provide();
@@ -86,38 +92,52 @@ import io.dropwizard.auth.oauth.OAuthFactory;
                     cookieOAuthProvider.setRequest(customRequest);
                     info = cookieOAuthProvider.provide();
                 }
-
+                String domainId = getDomainId(info, request);
                 if (info != null) {
-                    String domainId = extractDomainId(info, request);
-                    checkAccessRules(info, request, domainId);
+                    if (checkDomain && !info.getDomainId().equals(domainId)) {
+                        throw new WebApplicationException(generateUnauthorizedTokenResponse());
+                    }
+                    checkTokenAccessRules(info, request, domainId);
                     storeAuthorizationInfoInRequestProperties(info, request);
                 } else {
-                    throw new WebApplicationException(generateInvalidTokenResponse());
+                    checkPublicAccess(domainId, request);
                 }
             }
         }
     }
 
-    private String extractDomainId(AuthorizationInfo info, ContainerRequestContext request) {
-        if (checkDomain && REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
-            String domainId = request.getUriInfo().getPath().split("/")[1];
-            if (!info.getDomainId().equals(domainId)) {
-                throw new WebApplicationException(generateUnauthorizedTokenResponse());
-            }
-            return domainId;
+    private String getDomainId(AuthorizationInfo info, ContainerRequestContext request) {
+        if (REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
+            return request.getUriInfo().getPath().split("/")[1];
+        } else {
+            return info != null ? info.getDomainId() : null;
         }
-        return null;
     }
 
-    public void checkAccessRules(final AuthorizationInfo info, final ContainerRequestContext request, String domainId) {
-        String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
-        Set<JsonObject> applicableRules = Sets.filter(info.getAccessRules(),
-                rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(scopeUrl, rule) && matchesMediaTypes(request, rule)
-                        && matchesTokenType(info.getTokenReader().getInfo(), rule));
+    public void checkTokenAccessRules(final AuthorizationInfo info, final ContainerRequestContext request, String domainId) {
+        Set<JsonObject> applicableRules = checkAccessRules(info.getAccessRules(), request, domainId, info.getUserId() != null);
         // If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
             throw new WebApplicationException(generateUnauthorizedTokenResponse());
         }
+    }
+
+    public void checkPublicAccess(String domainId, final ContainerRequestContext request) {
+        Set<JsonObject> applicableRules = null;
+        if(publicAccessService != null) {
+            Set<JsonObject> accessRules = publicAccessService.getDomainPublicRules(domainId);
+            applicableRules = checkAccessRules(accessRules, request, domainId, false);
+        }
+        // If no rules apply then by default access is denied
+        if (applicableRules != null && applicableRules.isEmpty()) {
+            throw new WebApplicationException(generateInvalidTokenResponse());
+        }
+    }
+
+    public Set<JsonObject> checkAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId, boolean userToken) {
+        String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
+        return Sets.filter(accessRules, rule -> matchesMethod(request.getMethod(), rule) &&
+                matchesUriPath(scopeUrl, rule) && matchesMediaTypes(request, rule) && (matchesTokenType(userToken, rule)));
     }
 
     private Response generateInvalidTokenResponse() {
@@ -138,7 +158,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         request.setProperty(AUTHORIZATION_INFO_PROPERTIES_KEY, info);
     }
 
-    private boolean matchesTokenType(TokenInfo token, JsonObject rule) {
+    private boolean matchesTokenType(boolean userToken, JsonObject rule) {
         if (!rule.has("tokenType")) {
             // if no tokenType is defined there's nothing to check.
             return true;
@@ -146,7 +166,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
         String value = rule.get("tokenType").getAsString();
         switch (value) {
             case "user":
-                return token.getUserId() != null;
+                return userToken;
             default:
                 return false; // if we don't know what that value means then fail the rule
         }
