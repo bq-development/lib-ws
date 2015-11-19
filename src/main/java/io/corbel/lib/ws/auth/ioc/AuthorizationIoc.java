@@ -2,6 +2,8 @@ package io.corbel.lib.ws.auth.ioc;
 
 import javax.ws.rs.container.ContainerRequestFilter;
 
+import io.corbel.eventbus.ioc.EventBusIoc;
+import io.corbel.eventbus.service.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +34,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
  * @author Alexander De Leon
  * 
  */
-@Configuration @Import(TokenIoc.class) public class AuthorizationIoc {
+@Configuration @Import({TokenIoc.class, EventBusIoc.class}) public class AuthorizationIoc {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationIoc.class);
 
@@ -120,7 +122,7 @@ import io.dropwizard.auth.oauth.OAuthFactory;
     }
 
     @Bean
-    public AuthorizationInfoProvider getauthorizationInfoProvider() {
+    public AuthorizationInfoProvider getAuthorizationInfoProvider() {
         return new AuthorizationInfoProvider();
     }
 
@@ -146,12 +148,20 @@ import io.dropwizard.auth.oauth.OAuthFactory;
     }
 
     @Bean
+    public PublicAccessService getPublicAccessService(AuthorizationRulesService authorizationRulesService,
+            @Value("${auth.waitTimeForPublishPublicScopes:1000}") Integer waitTimeForPublishPublicScopes, EventBus eventBus,
+            @Value("${auth.audience}") String audience) {
+        return new DefaultPublicAccessService(authorizationRulesService, waitTimeForPublishPublicScopes, eventBus, audience);
+    }
+
+    @Bean
     public ContainerRequestFilter getAuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> oauthProvider,
-            CookieOAuthFactory<AuthorizationInfo> cookieOauthProvider, @Value("${auth.enabled}") boolean authEnabled,
-            @Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath,
+            CookieOAuthFactory<AuthorizationInfo> cookieOauthProvider, PublicAccessService publicAccessService,
+            @Value("${auth.enabled}") boolean authEnabled, @Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath,
             @Value("${auth.checkDomain.enabled:false}") boolean checkDomain) {
         if (authEnabled) {
-            return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, unAuthenticatedPath, checkDomain);
+            return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, publicAccessService, unAuthenticatedPath,
+                    checkDomain);
         } else {
             LOG.warn("Authorization validation is disabled. The system runs in INSECURE mode");
             return emptyFilter();
