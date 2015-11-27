@@ -1,12 +1,5 @@
 package io.corbel.lib.ws.ioc;
 
-import io.corbel.lib.ws.api.provider.RemoteAddressProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-
-import io.corbel.lib.queries.builder.QueryParametersBuilder;
 import io.corbel.lib.queries.parser.AggregationParser;
 import io.corbel.lib.queries.parser.CustomJsonParser;
 import io.corbel.lib.queries.parser.CustomSearchParser;
@@ -15,10 +8,18 @@ import io.corbel.lib.queries.parser.JacksonAggregationParser;
 import io.corbel.lib.queries.parser.JacksonQueryParser;
 import io.corbel.lib.queries.parser.JacksonSortParser;
 import io.corbel.lib.queries.parser.PaginationParser;
+import io.corbel.lib.queries.parser.QueryParametersParser;
 import io.corbel.lib.queries.parser.QueryParser;
 import io.corbel.lib.queries.parser.SearchParser;
 import io.corbel.lib.queries.parser.SortParser;
+import io.corbel.lib.ws.api.provider.RemoteAddressProvider;
 import io.corbel.lib.ws.queries.QueryParametersProvider;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
@@ -34,12 +35,12 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
     @Bean
     public QueryParametersProvider getSearchParametersProvider() {
         return new QueryParametersProvider(Integer.valueOf(env.getProperty("api.defaultPageSize")), Integer.valueOf(env
-                .getProperty("api.maxPageSize")), getQueryParametersBuilder());
+                .getProperty("api.maxPageSize")), getQueryParametersParser());
     }
 
     @Bean
-    public QueryParametersBuilder getQueryParametersBuilder() {
-        return new QueryParametersBuilder(getQueryParser(), getAggregationParser(), getSortParser(), getPaginationParser(),
+    public QueryParametersParser getQueryParametersParser() {
+        return new QueryParametersParser(getQueryParser(), getAggregationParser(), getSortParser(), getPaginationParser(),
                 getSearchParser());
     }
 

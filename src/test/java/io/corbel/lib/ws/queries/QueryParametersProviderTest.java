@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import io.corbel.lib.queries.builder.QueryParametersBuilder;
 import io.corbel.lib.queries.builder.ResourceQueryBuilder;
 import io.corbel.lib.queries.jaxrs.QueryParameters;
 import io.corbel.lib.queries.parser.CustomJsonParser;
@@ -14,6 +13,7 @@ import io.corbel.lib.queries.parser.DefaultPaginationParser;
 import io.corbel.lib.queries.parser.JacksonAggregationParser;
 import io.corbel.lib.queries.parser.JacksonQueryParser;
 import io.corbel.lib.queries.parser.JacksonSortParser;
+import io.corbel.lib.queries.parser.QueryParametersParser;
 import io.corbel.lib.queries.request.Aggregation;
 import io.corbel.lib.queries.request.Count;
 import io.corbel.lib.queries.request.ResourceQuery;
@@ -53,11 +53,11 @@ public class QueryParametersProviderTest {
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         CustomJsonParser parser = new CustomJsonParser(mapper.getFactory());
-        QueryParametersBuilder queryParametersBuilder = new QueryParametersBuilder(new JacksonQueryParser(parser),
+        QueryParametersParser queryParametersparser = new QueryParametersParser(new JacksonQueryParser(parser),
                 new JacksonAggregationParser(parser), new JacksonSortParser(parser), new DefaultPaginationParser(), new CustomSearchParser(
                         mapper));
 
-        QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, queryParametersBuilder);
+        QueryParametersProvider provider = new QueryParametersProvider(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, queryParametersparser);
         QueryParametersProvider.QueryParametersFactoryProvider queryParametersFactoryProvider = new QueryParametersProvider.QueryParametersFactoryProvider(
                 null, null);
         Parameter parameter = Parameter.create(null, null, false, QueryParameters.class, null, this.getClass().getField("restAnnotation")

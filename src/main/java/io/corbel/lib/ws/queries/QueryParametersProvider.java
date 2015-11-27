@@ -1,8 +1,8 @@
 package io.corbel.lib.ws.queries;
 
-import io.corbel.lib.queries.builder.QueryParametersBuilder;
 import io.corbel.lib.queries.exception.InvalidParameterException;
 import io.corbel.lib.queries.jaxrs.QueryParameters;
+import io.corbel.lib.queries.parser.QueryParametersParser;
 import io.corbel.lib.ws.SpringJerseyProvider;
 import io.corbel.lib.ws.annotation.Rest;
 import io.corbel.lib.ws.api.error.ErrorMessage;
@@ -50,12 +50,12 @@ public class QueryParametersProvider implements SpringJerseyProvider {
 
     private static int defaultPageSize;
     private static int maxPageSize;
-    private static QueryParametersBuilder queryParametersBuilder;
+    private static QueryParametersParser queryParametersParser;
 
-    public QueryParametersProvider(int defaultPageSize, int maxPageSize, QueryParametersBuilder queryParametersBuilder) {
+    public QueryParametersProvider(int defaultPageSize, int maxPageSize, QueryParametersParser queryParametersParser) {
         QueryParametersProvider.defaultPageSize = defaultPageSize;
         QueryParametersProvider.maxPageSize = maxPageSize;
-        QueryParametersProvider.queryParametersBuilder = queryParametersBuilder;
+        QueryParametersProvider.queryParametersParser = queryParametersParser;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class QueryParametersProvider implements SpringJerseyProvider {
             MultivaluedMap<String, String> params = getContainerRequestBind().getUriInfo().getQueryParameters();
 
             try {
-                return queryParametersBuilder.createQueryParameters(getIntegerParam(params, API_PAGE).orElse(0),
+                return queryParametersParser.createQueryParameters(getIntegerParam(params, API_PAGE).orElse(0),
                         getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize), maxPageSize, getStringParam(params, API_SORT),
                         getListStringParam(params, API_QUERY), getListStringParam(params, API_CONDITION),
                         getStringParam(params, API_AGGREGATION), getStringParam(params, API_SEARCH), getBooleanParam(params, API_BINDED));
