@@ -23,4 +23,10 @@ public class DefaultAuthorizationRulesService implements AuthorizationRulesServi
 		return repository.get(key);
 	}
 
+	@Override
+	public boolean existsRulesForToken(String token, String audience) {
+		String key = repository.getKeyForAuthorizationRules(token, audience);
+		return repository.existsRules(key);
+	}
+
 }

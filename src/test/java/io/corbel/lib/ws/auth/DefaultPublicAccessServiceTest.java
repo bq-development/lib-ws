@@ -9,6 +9,7 @@ import io.dropwizard.auth.AuthenticationException;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,8 +60,10 @@ public class DefaultPublicAccessServiceTest {
 
     @Test
     public void testDomainWithPublicScopesNotPublished() {
+        when(authorizationRulesServiceMock.existsRulesForToken(TEST_DOMAIN +
+                DefaultPublicAccessService.PUBLIC_SCOPES_SUFFIX, TEST_AUDIENCE)).thenReturn(false);
         when(authorizationRulesServiceMock.getAuthorizationRules(TEST_DOMAIN +
-                DefaultPublicAccessService.PUBLIC_SCOPES_SUFFIX, TEST_AUDIENCE)).thenReturn(null);
+                DefaultPublicAccessService.PUBLIC_SCOPES_SUFFIX, TEST_AUDIENCE)).thenReturn(Collections.emptySet());
         Set<JsonObject> publicRules = publicAccessService.getDomainPublicRules(TEST_DOMAIN);
         assertThat(publicRules.size()).isEqualTo(0);
     }

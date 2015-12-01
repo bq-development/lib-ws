@@ -33,13 +33,12 @@ public class DefaultPublicAccessService implements PublicAccessService {
     @Override
     public Set<JsonObject> getDomainPublicRules(String domainId) {
         if (domainId != null) {
-            Set<JsonObject> accessRules = authorizationRulesService.getAuthorizationRules(domainId + PUBLIC_SCOPES_SUFFIX, audience);
-            if (accessRules == null) {
+            String token = domainId + PUBLIC_SCOPES_SUFFIX;
+            if(!authorizationRulesService.existsRulesForToken(token, audience)) {
                 eventBus.dispatch(new DomainPublicScopesNotPublishedEvent(domainId));
                 waitPublicScopesArePublished();
-                accessRules = authorizationRulesService.getAuthorizationRules(domainId + PUBLIC_SCOPES_SUFFIX, audience);
             }
-            return accessRules != null ? accessRules : Collections.EMPTY_SET;
+            return authorizationRulesService.getAuthorizationRules(token, audience);
         }
         return Collections.EMPTY_SET;
     }

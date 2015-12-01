@@ -12,4 +12,5 @@ public interface AuthorizationRulesService {
 
 	Set<JsonObject> getAuthorizationRules(String token, String audience);
 
+	boolean existsRulesForToken(String token, String audience);
 }
