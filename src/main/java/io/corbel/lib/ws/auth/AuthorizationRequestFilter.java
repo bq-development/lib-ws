@@ -1,17 +1,35 @@
 package io.corbel.lib.ws.auth;
 
 import static java.util.stream.StreamSupport.stream;
+import io.corbel.lib.ws.api.error.ErrorResponseFactory;
+import io.dropwizard.auth.oauth.OAuthFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
@@ -24,15 +42,12 @@ import javax.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import io.corbel.lib.ws.api.error.ErrorResponseFactory;
-import io.dropwizard.auth.oauth.OAuthFactory;
-import org.springframework.util.CollectionUtils;
 
 /**
  * This class is a bit of a hack to Dropwizard(Jersey 2.17). It uses the {@link io.dropwizard.auth.oauth.OAuthFactory} class to obtain an
@@ -68,7 +83,7 @@ import org.springframework.util.CollectionUtils;
     }
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-                                      String unAuthenticatedPathPattern, boolean checkDomain) {
+            String unAuthenticatedPathPattern, boolean checkDomain) {
         this(provider, cookieOAuthProvider, null, unAuthenticatedPathPattern, checkDomain);
     }
 
@@ -125,7 +140,7 @@ import org.springframework.util.CollectionUtils;
 
     public void checkPublicAccessRules(String domainId, final ContainerRequestContext request) {
         Set<JsonObject> applicableRules = null;
-        if(publicAccessService != null) {
+        if (publicAccessService != null) {
             Set<JsonObject> accessRules = publicAccessService.getDomainPublicRules(domainId);
             applicableRules = getApplicableAccessRules(accessRules, request, domainId, false);
         }
@@ -135,10 +150,11 @@ import org.springframework.util.CollectionUtils;
         }
     }
 
-    public Set<JsonObject> getApplicableAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId, boolean userToken) {
+    public Set<JsonObject> getApplicableAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId,
+            boolean userToken) {
         String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
-        return Sets.filter(accessRules, rule -> matchesMethod(request.getMethod(), rule) &&
-                matchesUriPath(scopeUrl, rule) && matchesMediaTypes(request, rule) && (matchesTokenType(userToken, rule)));
+        return Sets.filter(accessRules, rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(scopeUrl, rule)
+                && matchesMediaTypes(request, rule) && (matchesTokenType(userToken, rule)));
     }
 
     private Response generateInvalidTokenResponse() {
@@ -150,8 +166,9 @@ import org.springframework.util.CollectionUtils;
     }
 
     private String extractScopeUrl(String domainId, String path) {
-        if (domainId != null)
-            path = path.replace(domainId + "/", "");
+        if (domainId != null) {
+            path = path.replaceFirst("(v[0-9]*\\.[0-9]*/)" + domainId + "/", "$1");
+        }
         return path.substring(path.indexOf("/") + 1);
     }
 
@@ -195,8 +212,8 @@ import org.springframework.util.CollectionUtils;
         JsonArray mediaTypesArray = input.get("mediaTypes").getAsJsonArray();
 
         for (MediaType mediaType : request.getAcceptableMediaTypes()) {
-            if (stream(mediaTypesArray.spliterator(), true)
-                    .map(mediaTypeElement -> MediaType.valueOf(mediaTypeElement.getAsString())).anyMatch(mediaType::isCompatible)) {
+            if (stream(mediaTypesArray.spliterator(), true).map(mediaTypeElement -> MediaType.valueOf(mediaTypeElement.getAsString()))
+                    .anyMatch(mediaType::isCompatible)) {
                 return true;
             }
         }
