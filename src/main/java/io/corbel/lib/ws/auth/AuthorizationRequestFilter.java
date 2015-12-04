@@ -8,11 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
@@ -42,7 +38,6 @@ import javax.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -136,21 +131,26 @@ import com.google.gson.JsonObject;
     public void checkTokenAccessRules(final AuthorizationInfo info, final ContainerRequestContext request, String domainId) {
         Set<JsonObject> applicableRules = getApplicableAccessRules(info.getAccessRules(), request, domainId, info.getUserId() != null);
         // If no rules apply then by default access is denied
-        if (applicableRules.isEmpty()) {
+        if (applicableRules.isEmpty() && getPublicAccessRules(domainId, request).isEmpty()) {
             throw new WebApplicationException(generateUnauthorizedTokenResponse());
         }
     }
 
     public void checkPublicAccessRules(String domainId, final ContainerRequestContext request) {
+        Set<JsonObject> applicableRules = getPublicAccessRules(domainId, request);
+        // If no rules apply then by default access is denied
+        if (applicableRules.isEmpty()) {
+            throw new WebApplicationException(generateInvalidTokenResponse());
+        }
+    }
+
+    private Set<JsonObject> getPublicAccessRules(String domainId, final ContainerRequestContext request) {
         Set<JsonObject> applicableRules = null;
         if (publicAccessService != null) {
             Set<JsonObject> accessRules = publicAccessService.getDomainPublicRules(domainId);
             applicableRules = getApplicableAccessRules(accessRules, request, domainId, false);
         }
-        // If no rules apply then by default access is denied
-        if (CollectionUtils.isEmpty(applicableRules)) {
-            throw new WebApplicationException(generateInvalidTokenResponse());
-        }
+        return applicableRules != null ? applicableRules : Collections.EMPTY_SET;
     }
 
     public Set<JsonObject> getApplicableAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId,

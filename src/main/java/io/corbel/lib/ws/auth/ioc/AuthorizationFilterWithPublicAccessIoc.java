@@ -26,7 +26,7 @@ public class AuthorizationFilterWithPublicAccessIoc {
 
     @Bean
     public PublicAccessService getPublicAccessService(AuthorizationRulesService authorizationRulesService,
-            @Value("${auth.waitTimeForPublishPublicScopes:1000}") Integer waitTimeForPublishPublicScopes, EventBus eventBus,
+            @Value("${auth.waitTimeForPublishPublicScopes:500}") Integer waitTimeForPublishPublicScopes, EventBus eventBus,
             @Value("${auth.audience}") String audience) {
         return new DefaultPublicAccessService(authorizationRulesService, waitTimeForPublishPublicScopes, eventBus, audience);
     }
