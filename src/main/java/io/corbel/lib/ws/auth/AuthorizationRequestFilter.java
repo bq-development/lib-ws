@@ -131,33 +131,33 @@ import com.google.gson.JsonObject;
     public void checkTokenAccessRules(final AuthorizationInfo info, final ContainerRequestContext request, String domainId) {
         Set<JsonObject> applicableRules = getApplicableAccessRules(info.getAccessRules(), request, domainId, info.getUserId() != null);
         // If no rules apply then by default access is denied
-        if (applicableRules.isEmpty() && getPublicAccessRules(domainId, request).isEmpty()) {
+        if (applicableRules.isEmpty() && getApplicablePublicAccessRules(domainId, request).isEmpty()) {
             throw new WebApplicationException(generateUnauthorizedTokenResponse());
         }
     }
 
     public void checkPublicAccessRules(String domainId, final ContainerRequestContext request) {
-        Set<JsonObject> applicableRules = getPublicAccessRules(domainId, request);
+        Set<JsonObject> applicableRules = getApplicablePublicAccessRules(domainId, request);
         // If no rules apply then by default access is denied
         if (applicableRules.isEmpty()) {
             throw new WebApplicationException(generateInvalidTokenResponse());
         }
     }
 
-    private Set<JsonObject> getPublicAccessRules(String domainId, final ContainerRequestContext request) {
+    private Set<JsonObject> getApplicableAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId,
+            boolean userToken) {
+        String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
+        return Sets.filter(accessRules, rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(scopeUrl, rule)
+                && matchesMediaTypes(request, rule) && (matchesTokenType(userToken, rule)));
+    }
+
+    private Set<JsonObject> getApplicablePublicAccessRules(String domainId, final ContainerRequestContext request) {
         Set<JsonObject> applicableRules = null;
         if (publicAccessService != null) {
             Set<JsonObject> accessRules = publicAccessService.getDomainPublicRules(domainId);
             applicableRules = getApplicableAccessRules(accessRules, request, domainId, false);
         }
         return applicableRules != null ? applicableRules : Collections.EMPTY_SET;
-    }
-
-    public Set<JsonObject> getApplicableAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId,
-            boolean userToken) {
-        String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
-        return Sets.filter(accessRules, rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(scopeUrl, rule)
-                && matchesMediaTypes(request, rule) && (matchesTokenType(userToken, rule)));
     }
 
     private Response generateInvalidTokenResponse() {
