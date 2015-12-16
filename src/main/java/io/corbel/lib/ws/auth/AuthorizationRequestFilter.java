@@ -58,10 +58,12 @@ import com.google.gson.JsonObject;
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationRequestFilter.class);
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
+    public static final String DOMAIN_REQUEST_PROPERTY_KEY = "DomainRequest";
 
     private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final String VERSION_REGEX = "v[0-9]+\\.[0-9]+/";
     private static final String EMPTY_STRING = "";
+
 
     private final OAuthFactory<AuthorizationInfo> oAuthProvider;
     private final CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider;
@@ -113,8 +115,10 @@ import com.google.gson.JsonObject;
                     }
                     checkTokenAccessRules(info, request, domainId);
                     storeAuthorizationInfoInRequestProperties(info, request);
+                    storeDomainRequestProperties(domainId, request);
                 } else {
                     checkPublicAccessRules(domainId, request);
+                    storeDomainRequestProperties(domainId, request);
                 }
             }
         }
@@ -175,6 +179,10 @@ import com.google.gson.JsonObject;
 
     private void storeAuthorizationInfoInRequestProperties(AuthorizationInfo info, ContainerRequestContext request) {
         request.setProperty(AUTHORIZATION_INFO_PROPERTIES_KEY, info);
+    }
+
+    private void storeDomainRequestProperties(String domain, ContainerRequestContext request) {
+        request.setProperty(DOMAIN_REQUEST_PROPERTY_KEY, domain);
     }
 
     private boolean matchesTokenType(boolean userToken, JsonObject rule) {
