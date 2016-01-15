@@ -25,6 +25,8 @@ public class ErrorResponseFactory {
 	private static final Error DEFAULT_NOT_FOUND_ERROR = new Error("not_found", ErrorMessage.NOT_FOUND.getMessage());
 	private static final Error DEFAULT_BAD_REQUEST_ERROR = new Error("bad_request",
 			ErrorMessage.BAD_REQUEST.getMessage());
+	private static final Error GATEWAY_TIMEOUT_ERROR = new Error("gateway_timeout",
+			ErrorMessage.GATEWAY_TIMEOUT.getMessage());
 	private static final Error DEFAULT_BAD_GATEWAY = new Error("bad_gateway", ErrorMessage.BAD_GATEWAY.getMessage());
 	private static ErrorResponseFactory instance;
 
@@ -53,6 +55,10 @@ public class ErrorResponseFactory {
 
 	public Response badRequest() {
 		return badRequest(DEFAULT_BAD_REQUEST_ERROR);
+	}
+
+	public Response gatewayTimeout() {
+		return gatewayTimeout(GATEWAY_TIMEOUT_ERROR);
 	}
 
 	public Response notFound() {
@@ -98,6 +104,10 @@ public class ErrorResponseFactory {
 
 	public Response badRequest(Error error) {
 		return jsonResponse(error, Status.BAD_REQUEST);
+	}
+
+	public Response gatewayTimeout(Error error) {
+		return jsonResponse(error, Status.GATEWAY_TIMEOUT);
 	}
 
 	public Response notfound(Error error) {

@@ -12,7 +12,7 @@ public enum ErrorMessage {
             "Precondition failed: {0}"), INVALID_PAGE("Invalid api:page param : {0}, must be a natural number."), INVALID_PAGE_SIZE(
             "Invalid api:pageSize param : {0}, must be an integer in (0,{1}]"), INVALID_SORT("Invalid api:sort param: {0}, {1}"), INVALID_SEARCH(
             "Invalid api:search param: {0}, {1}"), INVALID_QUERY("Invalid api:query param: {0}, {1}"), INVALID_AGGREGATION(
-            "Invalid api:aggregation param: {0}, {1}");
+            "Invalid api:aggregation param: {0}, {1}"), GATEWAY_TIMEOUT("Gateway Time-Out");
 
     private final String pattern;
 
