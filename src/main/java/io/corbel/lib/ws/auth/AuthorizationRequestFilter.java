@@ -110,7 +110,7 @@ import com.google.gson.JsonObject;
                 }
                 String domainId = getDomainId(info, request);
                 if (info != null) {
-                    if (checkDomain && !info.getDomainId().equals(domainId)) {
+                    if (checkDomain && !isEqualsOrChildDomain(info.getDomainId(), domainId)) {
                         throw new WebApplicationException(generateUnauthorizedTokenResponse());
                     }
                     checkTokenAccessRules(info, request, domainId);
@@ -122,6 +122,10 @@ import com.google.gson.JsonObject;
                 }
             }
         }
+    }
+
+    private boolean isEqualsOrChildDomain(String tokenDomainId, String urlDomainId) {
+        return tokenDomainId.equals(urlDomainId) || tokenDomainId.startsWith(urlDomainId + ":") || urlDomainId.startsWith(tokenDomainId + ":");
     }
 
     private String getDomainId(AuthorizationInfo info, ContainerRequestContext request) {
