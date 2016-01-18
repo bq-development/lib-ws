@@ -49,9 +49,9 @@ import com.google.gson.JsonObject;
  * instance of {@link AuthorizationInfo}. The filter is configured to only verify the set of request whose path matches the specified
  * pattern. It validates only access rules of type <b>http_access</b>. If request cannot proceed, it returns a HTTP error 401 without any
  * error information.
- * 
+ *
  * @author Alexander De Leon
- * 
+ *
  */
 @Priority(Priorities.AUTHORIZATION) public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
@@ -108,7 +108,7 @@ import com.google.gson.JsonObject;
                 }
                 String domainId = getDomainId(info, request);
                 if (info != null) {
-                    if (checkDomain && !info.getDomainId().equals(domainId)) {
+                    if (checkDomain && !isEqualsOrChildDomain(info.getDomainId(), domainId)) {
                         throw new WebApplicationException(generateUnauthorizedTokenResponse());
                     }
                     checkTokenAccessRules(info, request, domainId);
@@ -118,6 +118,10 @@ import com.google.gson.JsonObject;
                 }
             }
         }
+    }
+
+    private boolean isEqualsOrChildDomain(String tokenDomainId, String urlDomainId) {
+        return tokenDomainId.equals(urlDomainId) || tokenDomainId.startsWith(urlDomainId + ":") || urlDomainId.startsWith(tokenDomainId + ":");
     }
 
     private String getDomainId(AuthorizationInfo info, ContainerRequestContext request) {
