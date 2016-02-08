@@ -45,7 +45,7 @@ public class QueryParametersProvider implements SpringJerseyProvider {
     public static final String API_QUERY = "api:query";
     public static final String API_CONDITION = "api:condition";
     public static final String API_SEARCH = "api:search";
-    public static final String API_BINDED = "api:binded";
+    public static final String API_INDEX_FIELDS_ONLY = "api:indexFieldsOnly";
     public static final String API_AGGREGATION = "api:aggregation";
 
     private static int defaultPageSize;
@@ -87,7 +87,7 @@ public class QueryParametersProvider implements SpringJerseyProvider {
                 return queryParametersParser.createQueryParameters(getIntegerParam(params, API_PAGE).orElse(0),
                         getIntegerParam(params, API_PAGE_SIZE).orElse(defaultPageSize), maxPageSize, getStringParam(params, API_SORT),
                         getListStringParam(params, API_QUERY), getListStringParam(params, API_CONDITION),
-                        getStringParam(params, API_AGGREGATION), getStringParam(params, API_SEARCH), getBooleanParam(params, API_BINDED));
+                        getStringParam(params, API_AGGREGATION), getStringParam(params, API_SEARCH), getBooleanParam(params, API_INDEX_FIELDS_ONLY));
             } catch (InvalidParameterException e) {
                 throw toRequestException(e);
             } catch (IllegalArgumentException e) {
