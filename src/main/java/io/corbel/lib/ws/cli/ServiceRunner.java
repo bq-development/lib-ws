@@ -1,8 +1,16 @@
 package io.corbel.lib.ws.cli;
 
 import io.corbel.lib.ws.SpringJerseyProvider;
+import io.corbel.lib.ws.api.error.GenericExceptionMapper;
+import io.corbel.lib.ws.api.error.JsonValidationExceptionMapper;
+import io.corbel.lib.ws.api.error.NotFoundExceptionMapper;
 import io.corbel.lib.ws.api.error.URISyntaxExceptionMapper;
 import io.corbel.lib.ws.filter.ChunkedAwaredShallowEtagHeaderFilter;
+import io.corbel.lib.ws.filter.CustomShallowEtagHeaderFilter;
+import io.corbel.lib.ws.filter.OptionalContainerRequestFilter;
+import io.corbel.lib.ws.filter.OptionalContainerResponseFilter;
+import io.corbel.lib.ws.gson.GsonMessageReaderWriterProvider;
+import io.corbel.lib.ws.json.serialization.EmptyEntitiesAllowedJacksonMessageBodyProvider;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.logging.LoggingFactory;
@@ -30,19 +38,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.joran.spi.JoranException;
 
-import io.corbel.lib.ws.api.error.GenericExceptionMapper;
-import io.corbel.lib.ws.api.error.JsonValidationExceptionMapper;
-import io.corbel.lib.ws.api.error.NotFoundExceptionMapper;
-import io.corbel.lib.ws.filter.OptionalContainerRequestFilter;
-import io.corbel.lib.ws.filter.OptionalContainerResponseFilter;
-import io.corbel.lib.ws.gson.GsonMessageReaderWriterProvider;
-import io.corbel.lib.ws.json.serialization.EmptyEntitiesAllowedJacksonMessageBodyProvider;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,15 +111,17 @@ public abstract class ServiceRunner<T> {
 
         Boolean etagEnabled = applicationContext.getEnvironment().getProperty("etag.enabled", Boolean.class);
         if (etagEnabled == null || etagEnabled.equals(true)) {
-            if(applicationContext.getEnvironment().getProperty("etag.chunked.enabled", Boolean.class, false)) {
-                environment.getApplicationContext().addFilter(ChunkedAwaredShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+            if (applicationContext.getEnvironment().getProperty("etag.chunked.enabled", Boolean.class, false)) {
+                environment.getApplicationContext().addFilter(ChunkedAwaredShallowEtagHeaderFilter.class, "*",
+                        EnumSet.of(DispatcherType.REQUEST));
             } else {
-                environment.getApplicationContext().addFilter(ShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
+                environment.getApplicationContext().addFilter(CustomShallowEtagHeaderFilter.class, "*", EnumSet.of(DispatcherType.REQUEST));
             }
         }
 
         // Configure filters
-        Boolean httpMethodOverrideEnabled = applicationContext.getEnvironment().getProperty("filter.httpTunnelingFilter.enabled", Boolean.class, true);
+        Boolean httpMethodOverrideEnabled = applicationContext.getEnvironment().getProperty("filter.httpTunnelingFilter.enabled",
+                Boolean.class, true);
         if (httpMethodOverrideEnabled) {
             environment.jersey().register(HttpMethodOverrideFilter.class);
         }
