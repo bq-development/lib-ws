@@ -33,6 +33,10 @@ public class AuthorizationInfo {
 		return getTokenReader().getInfo().getUserId();
 	}
 
+    public String getDeviceId() {
+        return getTokenReader().getInfo().getDeviceId();
+    }
+
 	public String getClientId() {
 		return getTokenReader().getInfo().getClientId();
 	}
