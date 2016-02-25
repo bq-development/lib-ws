@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
         extends OptionalContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
-    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String UNAUTHENTICATED = "unauthenticated";
     private static final String TOKEN_PREFIX = "Bearer ";
@@ -30,18 +29,21 @@ import org.slf4j.LoggerFactory;
 
     private final TokenParser tokenParser;
     private final String unAuthenticatedPathPattern;
+    private final Pattern requestWithDomainPattern;
 
-    public AllowRequestWithoutDomainInUriFilter(boolean enabled, TokenParser tokenParser, String unAuthenticatedPathPattern) {
+    public AllowRequestWithoutDomainInUriFilter(boolean enabled, TokenParser tokenParser, String unAuthenticatedPathPattern,
+                                                String endpoints) {
         super(enabled);
         this.tokenParser = tokenParser;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
+        this.requestWithDomainPattern = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/(" + endpoints + ")/.*");
     }
 
     @Override
     public void filter(ContainerRequestContext request) {
         try {
             String path = request.getUriInfo().getPath();
-            if (!path.matches(unAuthenticatedPathPattern) && !REQUEST_WITH_DOMAIN_PATTERN.matcher(path).matches()) {
+            if (!path.matches(unAuthenticatedPathPattern) && !requestWithDomainPattern.matcher(path).matches()) {
                 String domain = extractRequestDomain(request);
                 int slashIndex = path.indexOf("/");
                 if (domain != null && slashIndex != -1) {

@@ -25,6 +25,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     private static final String TOKEN = "token";
     private static final String DOMAIN = "test";
+    private static final String ENDPOINTS = "resource|user|notifications";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_HEADER_WRONG_VALUE = "Wrong";
     private static final String AUTHORIZATION_HEADER_VALUE = "Bearer " + TOKEN;
@@ -46,7 +47,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
         when(tokenReader.getInfo()).thenReturn(tokenInfo);
         when(tokenParser.parseAndVerify(Mockito.anyString())).thenReturn(tokenReader);
         when(uriBuilder.replacePath(Mockito.anyString())).thenReturn(uriBuilder);
-        allowRequestWithoutDomainInUriFilter = new AllowRequestWithoutDomainInUriFilter(true, tokenParser, unAuthenticatedPathPattern);
+        allowRequestWithoutDomainInUriFilter = new AllowRequestWithoutDomainInUriFilter(true, tokenParser, unAuthenticatedPathPattern, ENDPOINTS);
     }
 
     @Test
@@ -71,6 +72,42 @@ public class AllowRequestWithoutDomainInUriFilterTest {
     @Test
     public void testFilterUriWithDomain() throws URISyntaxException {
         ContainerRequestContext request = setupContainerRequest("v1.0/test-qa/resource/test:Test", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterInIAMUriWithoutDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/user/1234/groups/group1", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder).replacePath(Mockito.anyString());
+        verify(uriBuilder).build();
+        verify(request).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterInIAMUriWithDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/test-qa/user/1234/groups/group1", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterInNotificationsUriWithoutDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/notifications/1234", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder).replacePath(Mockito.anyString());
+        verify(uriBuilder).build();
+        verify(request).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterInNotificationsUriWithDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/test-qa/notifications/1234", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
         verify(uriBuilder, times(0)).build();
