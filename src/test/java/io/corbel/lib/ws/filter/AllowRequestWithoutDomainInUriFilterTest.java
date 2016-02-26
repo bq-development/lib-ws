@@ -25,7 +25,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     private static final String TOKEN = "token";
     private static final String DOMAIN = "test";
-    private static final String ENDPOINTS = "resource|user|notifications";
+    private static final String ENDPOINTS = "resource,user,notifications";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_HEADER_WRONG_VALUE = "Wrong";
     private static final String AUTHORIZATION_HEADER_VALUE = "Bearer " + TOKEN;
