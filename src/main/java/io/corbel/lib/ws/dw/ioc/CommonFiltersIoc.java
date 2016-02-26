@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     @Bean
     public AllowRequestWithoutDomainInUriFilter getAllowRequestWithoutDomainInUriFilter(TokenParser tokenParser) {
         return new AllowRequestWithoutDomainInUriFilter(env.getProperty("filter.allowRequestWithoutDomainInUri.enabled", Boolean.class, false), tokenParser,
-                env.getProperty("auth.unAuthenticatedPath", String.class), env.getProperty("filter.allowRequestWithoutDomainInUri.endpoints", String.class));
+                env.getProperty("auth.unAuthenticatedPath", String.class), env.getProperty("filter.allowRequestWithoutDomainInUri.endpoints", String.class, ""));
     }
 
     @Bean
