@@ -1,5 +1,6 @@
 package io.corbel.lib.ws.filter;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +19,9 @@ public class ETagResponseFilter implements ContainerResponseFilter {
 
         if (rawEtag != null && rawEtag.equals(requestedEtag)) {
             responseContext.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+            if (responseContext.getEntity() instanceof Closeable) {
+                ((Closeable) responseContext.getEntity()).close();
+            };
             responseContext.setEntity(null);
         }
 
