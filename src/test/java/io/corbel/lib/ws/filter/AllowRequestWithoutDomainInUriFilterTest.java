@@ -25,7 +25,7 @@ public class AllowRequestWithoutDomainInUriFilterTest {
 
     private static final String TOKEN = "token";
     private static final String DOMAIN = "test";
-    private static final String ENDPOINTS = "resource,user,notifications";
+    private static final String ENDPOINTS = "resource,user,notifications,scope";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_HEADER_WRONG_VALUE = "Wrong";
     private static final String AUTHORIZATION_HEADER_VALUE = "Bearer " + TOKEN;
@@ -108,6 +108,24 @@ public class AllowRequestWithoutDomainInUriFilterTest {
     @Test
     public void testFilterInNotificationsUriWithDomain() throws URISyntaxException {
         ContainerRequestContext request = setupContainerRequest("v1.0/test-qa/notifications/1234", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
+        verify(uriBuilder, times(0)).build();
+        verify(request, times(0)).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterInScopeUriWithoutDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/scope", AUTHORIZATION_HEADER_VALUE);
+        allowRequestWithoutDomainInUriFilter.filter(request);
+        verify(uriBuilder).replacePath(Mockito.anyString());
+        verify(uriBuilder).build();
+        verify(request).setRequestUri(Mockito.any());
+    }
+
+    @Test
+    public void testFilterInScopeUriWithDomain() throws URISyntaxException {
+        ContainerRequestContext request = setupContainerRequest("v1.0/test-qa/scope", AUTHORIZATION_HEADER_VALUE);
         allowRequestWithoutDomainInUriFilter.filter(request);
         verify(uriBuilder, times(0)).replacePath(Mockito.anyString());
         verify(uriBuilder, times(0)).build();

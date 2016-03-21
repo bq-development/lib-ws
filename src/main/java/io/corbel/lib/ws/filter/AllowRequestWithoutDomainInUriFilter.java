@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
         super(enabled);
         this.tokenParser = tokenParser;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
-        this.requestWithDomainPattern = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/(" + endpoints.replace(",", "|") + ")/.*");
+        this.requestWithDomainPattern = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/(" + endpoints.replace(",", "|") + ")(/.*)?");
     }
 
     @Override
