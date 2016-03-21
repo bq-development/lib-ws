@@ -15,19 +15,19 @@ import io.dropwizard.auth.oauth.OAuthFactory;
  * @author Alexander De Leon
  * 
  */
-@Configuration
-@Import({AuthorizationCommonIoc.class})
-@Conditional(PublicAccessDisabledCondition.class)
-public class AuthorizationFilterIoc {
+@Configuration @Import({
+        AuthorizationCommonIoc.class}) @Conditional(PublicAccessDisabledCondition.class) public class AuthorizationFilterIoc {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationFilterIoc.class);
 
     @Bean
     public ContainerRequestFilter getAuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> oauthProvider,
             CookieOAuthFactory<AuthorizationInfo> cookieOauthProvider, @Value("${auth.enabled}") boolean authEnabled,
-                @Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath, @Value("${auth.checkDomain.enabled:false}") boolean checkDomain) {
+            @Value("${auth.unAuthenticatedPath}") String unAuthenticatedPath,
+            @Value("${auth.checkDomain.enabled:false}") boolean checkDomain,
+            @Value("${filter.allowRequestWithoutDomainInUri.endpoints:}") String endpoints) {
         if (authEnabled) {
-            return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, unAuthenticatedPath, checkDomain);
+            return new AuthorizationRequestFilter(oauthProvider, cookieOauthProvider, unAuthenticatedPath, checkDomain, endpoints);
         } else {
             LOG.warn("Authorization validation is disabled. The system runs in INSECURE mode");
             return emptyFilter();

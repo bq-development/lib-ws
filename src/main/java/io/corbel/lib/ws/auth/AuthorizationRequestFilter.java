@@ -59,7 +59,6 @@ import com.google.gson.JsonObject;
 
     public static final String AUTHORIZATION_INFO_PROPERTIES_KEY = "AuthorizationInfo";
 
-    private static final Pattern REQUEST_WITH_DOMAIN_PATTERN = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/\\w+/\\w+:.+");
     private static final String VERSION_REGEX = "v[0-9]+\\.[0-9]+/";
     private static final String EMPTY_STRING = "";
 
@@ -68,21 +67,23 @@ import com.google.gson.JsonObject;
     private final PublicAccessService publicAccessService;
     private final String unAuthenticatedPathPattern;
     private final boolean checkDomain;
+    private final Pattern requestWithDomainPattern;
 
     @Context private HttpServletRequest request;
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            PublicAccessService publicAccessService, String unAuthenticatedPathPattern, boolean checkDomain) {
+            PublicAccessService publicAccessService, String unAuthenticatedPathPattern, boolean checkDomain, String endpoints) {
         this.oAuthProvider = provider;
         this.cookieOAuthProvider = cookieOAuthProvider;
         this.publicAccessService = publicAccessService;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
         this.checkDomain = checkDomain;
+        this.requestWithDomainPattern = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/(" + endpoints.replace(",", "|") + ")(/.*)?");
     }
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            String unAuthenticatedPathPattern, boolean checkDomain) {
-        this(provider, cookieOAuthProvider, null, unAuthenticatedPathPattern, checkDomain);
+            String unAuthenticatedPathPattern, boolean checkDomain, String endpoints) {
+        this(provider, cookieOAuthProvider, null, unAuthenticatedPathPattern, checkDomain, endpoints);
     }
 
     public AuthorizationRequestFilter() {
@@ -91,6 +92,7 @@ import com.google.gson.JsonObject;
         publicAccessService = null;
         this.unAuthenticatedPathPattern = null;
         this.checkDomain = false;
+        this.requestWithDomainPattern = null;
     }
 
     @SuppressWarnings("unchecked")
@@ -125,7 +127,7 @@ import com.google.gson.JsonObject;
     }
 
     private String getDomainId(AuthorizationInfo info, ContainerRequestContext request) {
-        if (REQUEST_WITH_DOMAIN_PATTERN.matcher(request.getUriInfo().getPath()).matches()) {
+        if (requestWithDomainPattern.matcher(request.getUriInfo().getPath()).matches()) {
             return request.getUriInfo().getPath().split("/")[1];
         } else {
             return info != null ? info.getDomainId() : null;

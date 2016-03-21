@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -207,9 +208,9 @@ public class AuthorizationRequestFilterTest {
     public void publicAccessTest() {
         AuthorizationRequestFilter filter = stubFilter("");
         stubRequest(TEST_PATH_WITH_DOMAIN, HttpMethod.GET);
-        when(publicAccessService.getDomainPublicRules(TEST_DOMAIN)).thenReturn(
-                Sets.newHashSet(jsonParser.parse("{\"type\":\"http_access\", \"mediaTypes\":[ \"application/json\"], \"methods\":[\"GET\"], "
-                + "\"uri\": \"" + TEST_PATH_WITHOUT_VERSION + "\"}").getAsJsonObject()));
+        when(publicAccessService.getDomainPublicRules(TEST_DOMAIN)).thenReturn(Sets
+                .newHashSet(jsonParser.parse("{\"type\":\"http_access\", \"mediaTypes\":[ \"application/json\"], \"methods\":[\"GET\"], "
+                        + "\"uri\": \"" + TEST_PATH_WITHOUT_VERSION + "\"}").getAsJsonObject()));
         when(requestMock.getAcceptableMediaTypes()).thenReturn(Arrays.asList(MediaType.APPLICATION_JSON_TYPE));
         stubRules(jsonParser.parse("{\"type\":\"http_access\", \"mediaTypes\":[ \"application/json\"], \"methods\":[\"GET\"], "
                 + "\"uri\": \"" + TEST_PATH_WITHOUT_VERSION + "\"}").getAsJsonObject());
@@ -240,7 +241,7 @@ public class AuthorizationRequestFilterTest {
     }
 
     private AuthorizationRequestFilter stubFilter(String path) {
-        AuthorizationRequestFilter filter = spy(new AuthorizationRequestFilter(oAuthFactory, cookieProvider, publicAccessService, path, true));
+        AuthorizationRequestFilter filter = spy(new AuthorizationRequestFilter(oAuthFactory, cookieProvider, publicAccessService, path, true, "resource"));
         doReturn(servletRequest).when(filter).getRequest();
         return filter;
     }
