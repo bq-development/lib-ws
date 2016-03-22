@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
  * @author Alberto J. Rubio
  */
 @PreMatching @Priority(CorbelPriorities.ALLOW_REQUEST_WITHOUT_DOMAIN_IN_URI_FILTER) public class AllowRequestWithoutDomainInUriFilter
-        extends OptionalContainerRequestFilter {
+        extends
+            OptionalContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllowRequestWithoutDomainInUriFilter.class);
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -30,20 +31,22 @@ import org.slf4j.LoggerFactory;
     private final TokenParser tokenParser;
     private final String unAuthenticatedPathPattern;
     private final Pattern requestWithDomainPattern;
+    private final Pattern requestWithoutDomainPattern;
 
     public AllowRequestWithoutDomainInUriFilter(boolean enabled, TokenParser tokenParser, String unAuthenticatedPathPattern,
-                                                String endpoints) {
+            String endpoints) {
         super(enabled);
         this.tokenParser = tokenParser;
         this.unAuthenticatedPathPattern = unAuthenticatedPathPattern;
         this.requestWithDomainPattern = Pattern.compile("v[0-9]+\\.[0-9]+/[\\w\\-:\\.]+/(" + endpoints.replace(",", "|") + ")(/.*)?");
+        this.requestWithoutDomainPattern = Pattern.compile("v[0-9]+\\.[0-9]+/(" + endpoints.replace(",", "|") + ")(/.*)?");
     }
 
     @Override
     public void filter(ContainerRequestContext request) {
         try {
             String path = request.getUriInfo().getPath();
-            if (!path.matches(unAuthenticatedPathPattern) && !requestWithDomainPattern.matcher(path).matches()) {
+            if (!path.matches(unAuthenticatedPathPattern) && includeDomainInUri(path)) {
                 String domain = extractRequestDomain(request);
                 int slashIndex = path.indexOf("/");
                 if (domain != null && slashIndex != -1) {
@@ -58,6 +61,10 @@ import org.slf4j.LoggerFactory;
         } catch (TokenVerificationException ignored) {
             LOG.debug("Cannot parse authorization token");
         }
+    }
+
+    private boolean includeDomainInUri(String path) {
+        return !requestWithDomainPattern.matcher(path).matches() && requestWithoutDomainPattern.matcher(path).matches();
     }
 
     private String extractRequestDomain(ContainerRequestContext request) throws TokenVerificationException {
