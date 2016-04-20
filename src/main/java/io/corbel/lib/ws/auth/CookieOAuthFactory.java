@@ -29,6 +29,11 @@ public class CookieOAuthFactory<T> extends AuthFactory<String, T> {
         this.oAuthFactory = new OAuthFactory<T>(authenticator, realm, generatedClass);
     }
 
+    private CookieOAuthFactory(OAuthFactory<T> oAuthFactory) {
+        super(oAuthFactory.authenticator());
+        this.oAuthFactory = oAuthFactory;
+    }
+
     @Override
     public T provide() {
 
@@ -53,7 +58,7 @@ public class CookieOAuthFactory<T> extends AuthFactory<String, T> {
 
     @Override
     public AuthFactory<String, T> clone(boolean required) {
-        return oAuthFactory.clone(required);
+        return new CookieOAuthFactory<>((OAuthFactory<T>) oAuthFactory.clone(required));
     }
 
     public void responseBuilder(UnauthorizedHandler unauthorizedHandler) {
