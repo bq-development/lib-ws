@@ -2,6 +2,7 @@ package io.corbel.lib.ws.auth;
 
 import static java.util.stream.StreamSupport.stream;
 import io.corbel.lib.ws.api.error.ErrorResponseFactory;
+import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.auth.oauth.OAuthFactory;
 
 import java.io.BufferedReader;
@@ -72,7 +73,7 @@ import com.google.gson.JsonObject;
     @Context private HttpServletRequest request;
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            PublicAccessService publicAccessService, String unAuthenticatedPathPattern, boolean checkDomain, String endpoints) {
+                                      PublicAccessService publicAccessService, String unAuthenticatedPathPattern, boolean checkDomain, String endpoints) {
         this.oAuthProvider = provider;
         this.cookieOAuthProvider = cookieOAuthProvider;
         this.publicAccessService = publicAccessService;
@@ -82,7 +83,7 @@ import com.google.gson.JsonObject;
     }
 
     public AuthorizationRequestFilter(OAuthFactory<AuthorizationInfo> provider, CookieOAuthFactory<AuthorizationInfo> cookieOAuthProvider,
-            String unAuthenticatedPathPattern, boolean checkDomain, String endpoints) {
+                                      String unAuthenticatedPathPattern, boolean checkDomain, String endpoints) {
         this(provider, cookieOAuthProvider, null, unAuthenticatedPathPattern, checkDomain, endpoints);
     }
 
@@ -102,11 +103,14 @@ import com.google.gson.JsonObject;
             // OPTIONS is always allowed (for CORS)
             if (!request.getMethod().equals(HttpMethod.OPTIONS)) {
                 CustomRequest customRequest = new CustomRequest(getRequest(), request);
-                oAuthProvider.setRequest(customRequest);
-                AuthorizationInfo info = oAuthProvider.provide();
+                AuthFactory<String, AuthorizationInfo> localOAuthProvider = oAuthProvider.clone(false);
+                localOAuthProvider.setRequest(customRequest);
+                AuthorizationInfo info = localOAuthProvider.provide();
+
                 if (info == null) {
-                    cookieOAuthProvider.setRequest(customRequest);
-                    info = cookieOAuthProvider.provide();
+                    AuthFactory<String, AuthorizationInfo> localCookieOAuthProvider = cookieOAuthProvider.clone(false);
+                    localCookieOAuthProvider.setRequest(customRequest);
+                    info = localCookieOAuthProvider.provide();
                 }
                 String domainId = getDomainId(info, request);
                 if (info != null) {
@@ -151,7 +155,7 @@ import com.google.gson.JsonObject;
     }
 
     private Set<JsonObject> getApplicableAccessRules(Set<JsonObject> accessRules, final ContainerRequestContext request, String domainId,
-            boolean userToken) {
+                                                     boolean userToken) {
         String scopeUrl = extractScopeUrl(domainId, request.getUriInfo().getPath());
         return Sets.filter(accessRules, rule -> matchesMethod(request.getMethod(), rule) && matchesUriPath(scopeUrl, rule)
                 && matchesMediaTypes(request, rule) && (matchesTokenType(userToken, rule)));
