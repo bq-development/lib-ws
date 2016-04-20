@@ -102,11 +102,16 @@ import com.google.gson.JsonObject;
             // OPTIONS is always allowed (for CORS)
             if (!request.getMethod().equals(HttpMethod.OPTIONS)) {
                 CustomRequest customRequest = new CustomRequest(getRequest(), request);
-                oAuthProvider.setRequest(customRequest);
-                AuthorizationInfo info = oAuthProvider.provide();
+                AuthorizationInfo info;
+                synchronized(this) {
+                    oAuthProvider.setRequest(customRequest);
+                    info = oAuthProvider.provide();
+                }
                 if (info == null) {
-                    cookieOAuthProvider.setRequest(customRequest);
-                    info = cookieOAuthProvider.provide();
+                    synchronized(this) {
+                        cookieOAuthProvider.setRequest(customRequest);
+                        info = cookieOAuthProvider.provide();
+                    }
                 }
                 String domainId = getDomainId(info, request);
                 if (info != null) {
